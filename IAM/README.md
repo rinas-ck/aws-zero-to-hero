@@ -56,3 +56,39 @@ IAM Policies are written in **JSON**.
 }
 
 
+---
+
+# 🧱 IAM Policies Example
+
+IAM Policies define **what actions are allowed or denied** for a user, group, or role.
+
+---
+
+## 🎯 Allow & Deny Access to Buckets
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowAccessToBuckets",
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::bucket-677",
+        "arn:aws:s3:::test-bucket-7988"
+      ]
+    },
+    {
+      "Sid": "DenyRestrictedBucket",
+      "Effect": "Deny",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::test-bucket-86786"
+      ]
+    }
+  ]
+}
+
+
+
