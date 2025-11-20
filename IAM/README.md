@@ -89,6 +89,106 @@ IAM Policies define **what actions are allowed or denied** for a user, group, or
     }
   ]
 }
+```
 
+---
+
+# 🧩 Types of IAM Policies
+
+| Policy Type | Description |
+|-------------|-------------|
+| 🧑‍💻 **Identity-based Policy** | Attached to Users, Groups, or Roles |
+| 📦 **Resource-based Policy** | Attached to resources (e.g., S3 bucket policy) |
+| 🧾 **Inline Policy** | Directly written for one user/group/role — NOT reusable |
+| 🪪 **Managed Policy** | Prebuilt AWS policies or custom reusable ones |
+| ⚡ **Session Policy** | Temporary permissions via STS |
+| 🏢 **Organizational SCP** | Service Control Policies for AWS Organizations |
+
+---
+
+# 🧑‍🏫 IAM Roles
+
+IAM Roles are temporary identities used by AWS services or external users.
+
+### 🔥 Purpose
+- Grant temporary access using STS (Secure Token Service)  
+- Used for:  
+  ✔ EC2 instances  
+  ✔ Lambda  
+  ✔ Cross-account access  
+
+---
+
+## 🛠 Steps to Create a Role
+
+```md
+1. Create a Role & Assign Permissions  
+2. Create an Inline Policy for the Role  
+```
+
+### Example: Allow STS AssumeRole
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Statement1",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": "arn:aws:iam::123456789012:role/TempRole"
+    }
+  ]
+}
+```
+
+---
+
+# 🔄 Cross-Account Role Access
+
+### 🎯 Goal  
+Allow your IAM user (Account A) to access a friend's AWS Account (Account B).
+
+---
+
+## 👤 Friend’s Account (B)
+
+```md
+1. Create Role → Choose Another AWS Account  
+2. Enter your Account ID  
+3. Attach Policy (e.g., S3ReadOnlyAccess)  
+4. Copy Role ARN  
+```
+
+Example Role ARN:
+
+```
+arn:aws:iam::123456789012:role/CrossAccountAccessRole
+```
+
+---
+
+## 👨‍💻 Your Account (A)
+
+### Attach Policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": "arn:aws:iam::123456789012:role/CrossAccountAccessRole"
+    }
+  ]
+}
+```
+
+Then go to:
+
+**AWS Console → Switch Role**
+
+---
 
 
