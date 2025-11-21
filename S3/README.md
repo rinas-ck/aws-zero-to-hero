@@ -1,124 +1,83 @@
-# 🪣 Amazon S3 (Simple Storage Service)
+# ☁️ Amazon S3 (Simple Storage Service)
+
+Amazon S3 is a secure, scalable, and highly durable object storage service used for storing files, backups, media, logs, and more.
 
 ---
 
 ## ⭐ Features
 
-| Feature | Description |
-|--------|-------------|
-| 📦 Unlimited Storage | Store unlimited objects |
-| 📤 Auto-scalable | Grows automatically |
-| ⚡ Highly Available | 99.999999999% durability |
-| 📁 Max Upload Size | 160 GB (Console), 5 TB (CLI/SDK) |
-| 🔀 Multipart Upload | Required for files > 5 GB |
+- Unlimited storage  
+- Auto-scalable  
+- Highly durable (11 9’s durability)  
+- Max upload: **160GB (Console)**, **5TB (CLI)**  
+- Supports Multipart Upload for large files  
+- Global namespace (bucket names must be unique)
 
 ---
 
-## 🗄️ Storage Types
+## 🏺 Bucket Types
 
 | Type | Description |
 |------|-------------|
-| 🔒 Block Storage | EBS |
-| 🗂️ File Storage | EFS |
-| 🪣 Object Storage | S3 |
+| **General Purpose** | Normal bucket |
+| **Directory Bucket** | Low-latency, performance-optimized |
+| **Table Bucket** | Tabular data, analytics-optimized |
 
 ---
 
-## 🪣 Bucket Types
+## 🧱 Storage Types
 
-| Type | Description |
-|------|-------------|
-| 1️⃣ General Purpose | Regular storage |
-| 2️⃣ Directory Bucket | Low-latency bucket (NEW) |
-| 3️⃣ Table Bucket | Optimized for tabular data |
-
----
-
-# 🔧 S3 Bucket Management
-
-## 📝 Versioning
-
-- Prevents overwriting objects  
-- Maintains history  
-- Modes:  
-  ✔ Versioned  
-  ✔ Unversioned  
-  ✔ Suspended  
-
-### 🧪 Lab — Enable Versioning
-1. Create bucket  
-2. Upload a file  
-3. Enable Versioning  
-4. Upload same file again  
-5. Check object → Versions appear  
+| Storage Type | Description |
+|-------------|-------------|
+| ☁️ **Object Storage – S3** | Store files, images, logs, apps |
+| 📦 **Block Storage – EBS** | Used by EC2 instances |
+| 📁 **File Storage – EFS** | Shared file system across EC2 |
 
 ---
 
-# 🌍 Access Object via URL
+# 🪣 S3 Bucket Management
 
-| Step | Action |
-|------|--------|
-| 1️⃣ | Enable ACL |
-| 2️⃣ | Disable Block Public Access |
-| 3️⃣ | Make Object Public |
-
-### 🧪 Lab — Public Object Access
-1. Upload any image  
-2. Turn off “Block Public Access”  
-3. Enable ACL  
-4. Make object → Public  
-5. Copy object URL → open in browser  
+### 🔁 Versioning
+Prevents overwriting files with the same name.  
+Types:
+- **Unversioned**
+- **Versioning Enabled**
+- **Suspended**
 
 ---
 
-# 🧱 S3 ACL (Access Control Lists)
+## 🌐 Access Object via URL
+
+1. Enable ACLs  
+2. Disable “Block Public Access”  
+3. Make object public  
+
+---
+
+# 🔒 S3 ACL (Access Control List)
 
 | Type | Permissions |
 |------|-------------|
 | Bucket ACL | READ, WRITE |
-| Object ACL | READ |
-
-Modes:
-- 👤 User ACL  
-- 📦 Bucket ACL  
-
----
-
-# 🛡️ Object Lock
-
-| Mode | Description |
-|------|-------------|
-| 🔒 Governance | Prevents delete (needs special permission) |
-| 🧱 Compliance | Cannot delete until expiry |
-| ⚖️ Legal Hold | No expiry until removed |
-
-### 🧪 Lab — Enable Object Lock
-1. Create bucket → enable “Object Lock”  
-2. Upload object  
-3. Apply Legal Hold  
-4. Try deleting → fails  
+| Object ACL | READ, WRITE, READ_ACP, WRITE_ACP |
+| Single object | Independent ACL |
 
 ---
 
 # 🔐 S3 Encryption
 
-| Type | Where it Happens | Key Managed By |
+| Type | Where It Happens | Key Managed By |
 |------|------------------|----------------|
-| SSE-S3 | Bucket | AWS |
-| SSE-KMS | Bucket | AWS KMS |
-| SSE-C | Client | You |
-| DSSE-KMS | Bucket | AWS KMS |
-
-### 🧪 Lab — Enable Bucket Encryption
-1. Go to Bucket → Properties  
-2. Default Encryption  
-3. Choose SSE-S3 or SSE-KMS  
+| **Client-side** | Before upload | You |
+| **SSE-S3** | In S3 | AWS |
+| **SSE-KMS** | In S3 | KMS Keys |
+| **DSSE-KMS** | In S3 | AWS KMS (Dual key) |
 
 ---
 
-# 📜 Bucket Policy Example
+# 📜 Bucket Policy Example  
 
-### Public Read (Not Recommended)
+### **Public Read (Not Recommended)**
 
 ```json
 {
@@ -135,15 +94,16 @@ Modes:
 }
 
 
-🔁 Replication (CRR / SRR)
-TypeMeaning🔄 CRRCross Region Replication🔁 SRRSame Region Replication
-🧪 Lab — Enable Replication
+🌍 Replication (CRR & SRR)
 
 
-Create Source Bucket + Destination Bucket
+Create source bucket
 
 
-Enable Versioning on both
+Create destination bucket
+
+
+Enable versioning on both
 
 
 Go to Replication
@@ -152,161 +112,240 @@ Go to Replication
 Create IAM role automatically
 
 
-Replicate selected prefix
+Select prefix to replicate
+
+
+
+🧪 Lab – Enable Replication
+
+
+Create 2 buckets in different regions
+
+
+Enable versioning on both
+
+
+Open Replication tab
+
+
+Create replication rule
+
+
+Upload file in source bucket
+
+
+Check replicated object in destination bucket
 
 
 
 📦 Storage Classes & Lifecycle
-Storage Classes
-ClassUse Case💙 StandardFrequent access💛 Intelligent-TieringAuto-optimize cost🟧 Standard-IAInfrequent Access🟫 One-Zone IACheap infrequent❄️ GlacierArchive🧊 Deep ArchiveLowest cost long-term
+📌 Storage Classes
+ClassDescription🔵 S3 StandardFrequent Access🟡 S3 Standard-IAInfrequent access⚪ One Zone-IACheaper IA, 1 AZ only🧊 S3 Glacier Instant RetrievalArchive, milliseconds retrieval🧊 Glacier FlexibleMinutes to hours🧊 Glacier Deep Archive12 hours retrieval
 
-🔄 Lifecycle Configuration
+🔁 Lifecycle Configuration
 Two actions:
 
 
-Transition → move to cheaper storage
+Transition → Move to cheaper storage
 
 
-Expiration → auto-delete objects
-
-
-🧪 Lab — Lifecycle Rule
-
-
-Go to Bucket → Management
-
-
-Create Rule
-
-
-Transition to IA after 30 days
-
-
-Expire after 1 year
+Expiration → Delete after time
 
 
 
-🔔 S3 Event Notifications
-Triggers on:
+🧪 Lab – Lifecycle Rule
 
 
-PUT (create)
+Open bucket → Management tab
 
 
-DELETE
+Create lifecycle rule
 
 
-Metadata changes
+Add filters
+
+
+Add transition to IA
+
+
+Add expiration
+
+
+Save rule
+
+
+
+🔒 Object Lock
+
+
+Implements WORM (Write Once Read Many)
+
+
+Prevents deletion/modification for a set period
+
+
+Retention Modes
+
+
+Governance Mode – Admin can override
+
+
+Compliance Mode – Even admin cannot delete
+
+
+Legal Hold – No expiry until removed
+
+
+
+📄 Server Access Logging
+Used to log every access request.
+Steps:
+
+
+Create destination bucket
+
+
+Enable logging in source bucket (Properties → Logging)
+
+
+Logs will be stored in destination bucket
+
+
+
+🎯 S3 Event Notification
+Triggers events when:
+
+
+Object created
+
+
+Object removed
+
+
+Metadata changed
 
 
 Destinations:
 
 
-🔁 SQS
+SNS
 
 
-📩 SNS
+SQS
 
 
-🧠 Lambda
+Lambda
 
 
-🧪 Lab — Trigger Lambda on Upload
 
+🚀 S3 Transfer Acceleration
+Uses CloudFront edge locations for faster uploads/downloads.
 
-Create Lambda
-
-
-Go to S3 → “Notifications”
-
-
-Configure PUT event
+🧪 Lab – Make Files Public (ACL)
 
 
 Upload object
 
 
-Check CloudWatch logs
+Enable ACL
+
+
+Disable block public access
+
+
+Make object public
+
+
+Access using browser URL
 
 
 
-⚡ S3 Transfer Acceleration
+🧪 Lab – Bucket Policy Public Read
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicAccess",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::your-bucket-name/*"
+    }
+  ]
+}
 
 
-Uses CloudFront global edge locations
+🗃️ S3 Batch Operations
+Perform bulk operations:
 
 
-Faster uploads worldwide
+Copy objects
 
 
-URL becomes:
-bucketname.s3-accelerate.amazonaws.com
+Modify ACLs
 
 
-🧪 Lab
+Modify tags
 
 
-Enable “Transfer Acceleration”
-
-
-Compare speed with normal upload
-
-
-
-🚨 S3 Requester Pays
-
-
-Requester pays for download + transfer, not bucket owner.
-
-
-🧪 Lab
-
-
-Enable “Requester Pays” in Properties
-
-
-Use AWS CLI from another account to download
+Trigger Lambda for each object
 
 
 
-🌐 VPC Endpoint + S3
-
-
-Access S3 privately without internet
-
-
-No NAT Gateway required
-
-
-Uses Gateway VPC Endpoint
-
-
-Benefits:
-✔ Saves cost
-✔ More secure
-✔ Private traffic only
-
-💻 Useful S3 CLI Commands
+🖥️ EC2 via CMD – S3 Access
+Download from S3:
 aws s3 ls
-aws s3 mb s3://mybucket
-aws s3 cp file.txt s3://mybucket/
-aws s3 rm s3://mybucket/file.txt
-aws s3 rb s3://mybucket --force
+aws s3 cp s3://mybucket/file .
+aws s3 rm s3://mybucket/file
 
 
-🎯 Final Real-World Labs
-Lab 1 — Host Static Website
-✔ Create bucket
-✔ Upload index.html
-✔ Make public
-✔ Enable static hosting
-✔ Add bucket policy
-Lab 2 — Create Private Secure Bucket
-✔ Block Public Access
-✔ Enable KMS encryption
-✔ Access via IAM Role on EC2
-Lab 3 — S3 Backup System
-✔ Lifecycle Rules
-✔ Replication
-✔ Event → Lambda → SNS
+💸 S3 Requester Pays
+Requester pays the download & data transfer cost.
+Useful for sharing public data sets.
+
+🔐 VPC Endpoints for S3
+
+
+Private connection to S3 without using Internet
+
+
+No NAT needed
+
+
+
+🎉 Final Summary for Interview
+S3 important topics:
+
+
+Versioning
+
+
+Encryption (SSE-S3, SSE-KMS, DSSE)
+
+
+ACL vs Bucket Policy
+
+
+Lifecycle rules
+
+
+Replication (CRR/SRR)
+
+
+Storage classes
+
+
+Event notifications
+
+
+Transfer Acceleration
+
+
+Object Lock & Compliance mode
+
+
+Requester Pays
+
+
+
 
