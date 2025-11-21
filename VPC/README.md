@@ -1,4 +1,4 @@
------ PART 1 (COPY EVERYTHING BELOW THIS LINE) -----
+----- PART 1  -----
 
 <div align="center">
 
@@ -966,7 +966,6 @@ By now you understand the entire AWS VPC networking flow:
 - VPC Peering
 - Transit Gateway
 
-Congrats bro — **your VPC README is now better than 90% DevOps candidates**.
 
 -----
 
