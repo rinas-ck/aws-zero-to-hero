@@ -7,10 +7,11 @@ Amazon S3 is a secure, scalable, and durable object storage service used for sto
 ## ⭐ Features
 
 - Unlimited storage  
-- Highly durable  
+- Highly durable (11 9’s)  
 - Auto-scalable  
-- Max upload: **160GB (Console)**, **5TB (CLI)**  
-- Multipart upload support  
+- Max upload: **160GB (Console)** / **5TB (CLI)**  
+- Multipart upload  
+- Global namespace (bucket names must be unique)
 
 ---
 
@@ -19,8 +20,8 @@ Amazon S3 is a secure, scalable, and durable object storage service used for sto
 | Type | Description |
 |------|-------------|
 | General Purpose | Default bucket |
-| Directory Bucket | Fast low-latency |
-| Table Bucket | Tabular/analytics data |
+| Directory Bucket | Low-latency optimized |
+| Table Bucket | For analytics/tabular data |
 
 ---
 
@@ -28,17 +29,21 @@ Amazon S3 is a secure, scalable, and durable object storage service used for sto
 
 | Type | Description |
 |------|-------------|
-| Object Storage | Files, images, logs |
-| Block Storage | EC2 EBS volumes |
-| File Storage | EFS shared FS |
+| Object Storage | S3 |
+| Block Storage | EBS |
+| File Storage | EFS |
 
 ---
 
 # 🪣 S3 Bucket Management
 
-### 🔁 Versioning
+## 🔁 Versioning
+
+Prevents overwriting & keeps multiple versions.
+
+Modes:
 - Unversioned  
-- Versioning Enabled  
+- Enabled  
 - Suspended  
 
 ---
@@ -53,26 +58,26 @@ Amazon S3 is a secure, scalable, and durable object storage service used for sto
 
 # 🔒 S3 ACL (Access Control List)
 
-| ACL Type | Permissions |
-|----------|-------------|
+| Type | Permissions |
+|------|-------------|
 | Bucket ACL | READ / WRITE |
-| Object ACL | READ / WRITE / ACP |
+| Object ACL | READ / WRITE |
 
 ---
 
 # 🔐 S3 Encryption
 
-| Type | Happens In | Keys By |
-|------|------------|---------|
-| Client-side | Before upload | You |
+| Type | Where It Happens | Managed By |
+|------|------------------|------------|
+| Customer-side | Client | You |
 | SSE-S3 | S3 | AWS |
-| SSE-KMS | S3 | KMS |
-| DSSE-KMS | S3 | KMS (dual key) |
+| SSE-KMS | S3 | AWS KMS |
+| DSSE-KMS | S3 | AWS KMS |
 
 ---
 
 # 📜 Bucket Policy Example  
-### Public Read (Not Recommended)
+### ⭐ Public Read (Not Recommended)
 
 ```json
 {
@@ -96,61 +101,58 @@ Amazon S3 is a secure, scalable, and durable object storage service used for sto
 - Create source bucket  
 - Create destination bucket  
 - Enable versioning on both  
-- Open Replication  
-- IAM role auto-creates  
-- Select prefix to replicate  
+- Configure replication rule  
+- IAM role auto created  
 
 ---
 
 ## 🧪 Lab – Enable Replication
 
-1. Bucket A in region-1  
-2. Bucket B in region-2  
-3. Enable versioning  
-4. Go to Replication  
-5. Add rule → choose bucket B  
-6. IAM role auto-created  
-7. Upload file → appears in B  
+1. Create bucket A (region 1)  
+2. Create bucket B (region 2)  
+3. Enable versioning on both  
+4. Bucket A → Replication  
+5. Create rule → choose bucket B  
+6. Upload file → appears in B  
 
 ---
 
 # 📦 Storage Classes & Lifecycle
 
-### 📌 Storage Classes
+## ⭐ Storage Classes
 
 - S3 Standard  
-- Standard IA  
-- One Zone IA  
-- Glacier Instant Retrieval  
-- Glacier Flexible Retrieval  
+- Standard-IA  
+- One Zone-IA  
+- Glacier IR  
+- Glacier FR  
 - Glacier Deep Archive  
 
 ---
 
-# 🔁 Lifecycle Rules
+## 🔁 Lifecycle Rules
 
-**Two actions:**
-
-1. Transition  
-2. Expiration  
+Actions:
+- Transition → cheaper storage  
+- Expiration → delete objects  
 
 ---
 
 ## 🧪 Lab – Lifecycle Rule
 
-1. Open bucket → Management  
-2. Add rule  
-3. Add prefix  
-4. Transition to IA after 30 days  
+1. Bucket → Management  
+2. Create lifecycle rule  
+3. Add filter  
+4. Transition to IA  
 5. Expire after 365 days  
 
 ---
 
 # ⛔ Object Lock
 
-- WORM protection  
-- Governance Mode  
-- Compliance Mode  
+Modes:
+- Governance  
+- Compliance  
 - Legal Hold  
 
 ---
@@ -158,19 +160,20 @@ Amazon S3 is a secure, scalable, and durable object storage service used for sto
 # 📄 Server Access Logging
 
 1. Create destination bucket  
-2. Enable logging in source  
-3. Logs stored automatically  
+2. Source bucket → Logging  
+3. Select target  
+4. Logs start generating  
 
 ---
 
 # 📢 Event Notifications
 
-Triggered by:
-- Object Created  
-- Object Deleted  
-- Metadata Update  
+Triggers:
+- Object created  
+- Object removed  
+- Object metadata changed  
 
-Targets:
+Destinations:
 - SNS  
 - SQS  
 - Lambda  
@@ -179,32 +182,100 @@ Targets:
 
 # 🚀 Transfer Acceleration
 
-Uses CloudFront edge network for faster upload/download.
+Uses CloudFront Edge Network for FAST uploads.
 
 ---
 
-# 🧪 Lab – Public Access (ACL)
+# 🗃️ S3 Batch Operations
 
-1. Upload object  
-2. Enable ACL  
-3. Disable BPA  
-4. Make public  
-5. Open object URL  
+Used for bulk:  
+- Tagging  
+- Copying  
+- Deleting  
+- Lambda invocation  
 
 ---
 
-# 🧪 Lab – Public Bucket Policy
+# 💸 Requester Pays
+
+Requester pays for:
+- Download  
+- Data transfer  
+
+---
+
+# 🔐 VPC Endpoint for S3
+
+- Private access from VPC  
+- No internet required  
+- Uses Gateway Endpoint  
+
+---
+
+# 🎯 **NEW: Static Website Hosting (ADDED)**
+
+Amazon S3 can host static websites (HTML, CSS, JS).
+
+### Requirements:
+- Bucket **must be public**  
+- **Index document** must exist  
+- Static hosting must be **enabled**  
+
+### What it supports:
+✔ HTML  
+✔ CSS  
+✔ JS  
+✔ Images  
+❌ No server-side code (PHP/Node)
+
+---
+
+## ⭐ Website Endpoint Format
+
+```
+http://bucket-name.s3-website-region.amazonaws.com
+```
+
+Example:
+```
+http://myweb123.s3-website-us-east-1.amazonaws.com
+```
+
+---
+
+## 🔧 Steps to Enable Static Hosting
+
+1. Create bucket (public name recommended)  
+2. Upload `index.html` (and optional `error.html`)  
+3. Go to **Properties → Static Website Hosting**  
+4. Enable hosting  
+5. Enter:  
+   - Index document: `index.html`  
+   - Error document: `error.html`  
+6. Click **Save**  
+
+---
+
+## 🔓 Make the Site Public
+
+Go to:  
+**Permissions → Block Public Access → Turn OFF**
+
+Then add this bucket policy:
+
+---
+
+## 📜 Static Website Hosting – Public Bucket Policy
 
 ```json
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "PublicAccess",
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::your-bucket/*"
+      "Resource": "arn:aws:s3:::your-bucket-name/*"
     }
   ]
 }
@@ -212,40 +283,36 @@ Uses CloudFront edge network for faster upload/download.
 
 ---
 
-# 🗃️ S3 Batch Operations
+## 🧪 Lab – Host a Static Website on S3 (FULL STEPS)
 
-- Copy  
-- Delete  
-- Tag  
-- ACL updates  
-- Lambda per object  
-
----
-
-# 💸 Requester Pays
-
-Requester pays for:
-- Data download  
-- Transfer costs  
+1. Create bucket → name: `myweb-demo`  
+2. Upload `index.html`  
+3. Go to **Properties → Static Website Hosting**  
+4. Enable hosting  
+5. Enter `index.html` as Index file  
+6. Go to **Permissions**  
+7. Disable “Block Public Access”  
+8. Add public bucket policy (above)  
+9. Open the endpoint URL  
+10. Website loads successfully 🎉  
 
 ---
 
-# 🔐 VPC Endpoint for S3
+# 🎉 Final Summary for Interviews
 
-- Access S3 privately  
-- No internet needed  
+✔ Versioning  
+✔ Object Lock  
+✔ Encryption (SSE-S3, SSE-KMS)  
+✔ Bucket Policy vs ACL  
+✔ Storage Classes  
+✔ Lifecycle Rules  
+✔ Replication  
+✔ Logging  
+✔ Transfer Acceleration  
+✔ Requester Pays  
+✔ Static Website Hosting (IMPORTANT)  
+✔ Event Notifications  
 
----
 
-# 🎯 Interview Summary
 
-You must know:
-- Versioning  
-- Encryption  
-- ACL vs Policy  
-- Replication  
-- Lifecycle  
-- Storage Classes  
-- Events  
-- Object Lock  
-- Transfer Acceleration  
+
