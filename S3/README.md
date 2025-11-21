@@ -76,8 +76,7 @@ Types:
 ---
 
 # 📜 Bucket Policy Example  
-
-### **Public Read (Not Recommended)**
+### Public Read (Not Recommended)
 
 ```json
 {
@@ -93,172 +92,122 @@ Types:
   ]
 }
 
-
 🌍 Replication (CRR & SRR)
-
 
 Create source bucket
 
-
 Create destination bucket
 
-
 Enable versioning on both
-
 
 Go to Replication
 
-
 Create IAM role automatically
-
 
 Select prefix to replicate
 
+🧪 Lab – Enable Replication (Step-by-Step)
 
+Create bucket A in region 1
 
-🧪 Lab – Enable Replication
-
-
-Create 2 buckets in different regions
-
+Create bucket B in region 2
 
 Enable versioning on both
 
+Open bucket A → Replication
 
-Open Replication tab
+Add rule → choose bucket B
 
+IAM role auto-creates
 
-Create replication rule
-
-
-Upload file in source bucket
-
-
-Check replicated object in destination bucket
-
-
+Upload file → Verify in bucket B
 
 📦 Storage Classes & Lifecycle
 📌 Storage Classes
-ClassDescription🔵 S3 StandardFrequent Access🟡 S3 Standard-IAInfrequent access⚪ One Zone-IACheaper IA, 1 AZ only🧊 S3 Glacier Instant RetrievalArchive, milliseconds retrieval🧊 Glacier FlexibleMinutes to hours🧊 Glacier Deep Archive12 hours retrieval
-
+Class	Description
+🔵 S3 Standard	Frequent Access
+🟡 S3 Standard-IA	Infrequent access
+⚪ One Zone-IA	Cheaper IA, 1 AZ only
+🧊 S3 Glacier Instant Retrieval	Archive, milliseconds retrieval
+🧊 Glacier Flexible Retrieval	Minutes to hours
+🧊 Glacier Deep Archive	12 hours retrieval
 🔁 Lifecycle Configuration
-Two actions:
 
+Two actions:
 
 Transition → Move to cheaper storage
 
-
 Expiration → Delete after time
-
-
 
 🧪 Lab – Lifecycle Rule
 
-
 Open bucket → Management tab
-
 
 Create lifecycle rule
 
+Add prefix filter
 
-Add filters
+Transition to IA after 30 days
 
-
-Add transition to IA
-
-
-Add expiration
-
+Expire objects after 365 days
 
 Save rule
 
+⛔ Object Lock
 
+Prevents deletion/modification.
 
-🔒 Object Lock
+Modes:
 
+Governance Mode
 
-Implements WORM (Write Once Read Many)
+Compliance Mode (Strict – cannot delete at all)
 
-
-Prevents deletion/modification for a set period
-
-
-Retention Modes
-
-
-Governance Mode – Admin can override
-
-
-Compliance Mode – Even admin cannot delete
-
-
-Legal Hold – No expiry until removed
-
-
+Legal Hold
 
 📄 Server Access Logging
-Used to log every access request.
-Steps:
 
+Steps:
 
 Create destination bucket
 
-
 Enable logging in source bucket (Properties → Logging)
 
+Logs start storing in destination bucket
 
-Logs will be stored in destination bucket
+📢 S3 Event Notification
 
+Triggers on:
 
+Object Created
 
-🎯 S3 Event Notification
-Triggers events when:
+Object Deleted
 
-
-Object created
-
-
-Object removed
-
-
-Metadata changed
-
+Metadata Updated
 
 Destinations:
 
-
 SNS
-
 
 SQS
 
-
 Lambda
 
-
-
 🚀 S3 Transfer Acceleration
-Uses CloudFront edge locations for faster uploads/downloads.
+
+Uses CloudFront global edge network for faster upload/download.
 
 🧪 Lab – Make Files Public (ACL)
 
-
 Upload object
-
 
 Enable ACL
 
-
-Disable block public access
-
+Disable “Block Public Access”
 
 Make object public
 
-
-Access using browser URL
-
-
+Open the object URL
 
 🧪 Lab – Bucket Policy Public Read
 {
@@ -274,78 +223,59 @@ Access using browser URL
   ]
 }
 
-
 🗃️ S3 Batch Operations
-Perform bulk operations:
 
+Perform actions on millions of objects:
 
-Copy objects
+Copy
 
+Delete
 
-Modify ACLs
+Tag
 
+Change ACL
 
-Modify tags
-
-
-Trigger Lambda for each object
-
-
-
-🖥️ EC2 via CMD – S3 Access
-Download from S3:
-aws s3 ls
-aws s3 cp s3://mybucket/file .
-aws s3 rm s3://mybucket/file
-
+Invoke Lambda
 
 💸 S3 Requester Pays
-Requester pays the download & data transfer cost.
-Useful for sharing public data sets.
 
-🔐 VPC Endpoints for S3
+Requester pays for:
 
+Download
 
-Private connection to S3 without using Internet
+Data transfer
 
+Used for public datasets.
 
-No NAT needed
+🔐 VPC Endpoint for S3
 
+Connects S3 privately from VPC
 
+No internet or NAT needed
 
-🎉 Final Summary for Interview
-S3 important topics:
+🎉 Final Summary for Interviews
 
+Must-know S3 topics:
 
 Versioning
 
+Encryption (SSE-S3, KMS)
 
-Encryption (SSE-S3, SSE-KMS, DSSE)
+Replication
 
+Bucket Policy vs ACL
 
-ACL vs Bucket Policy
+Lifecycle
 
+Storage Classes
 
-Lifecycle rules
+Event Notifications
 
-
-Replication (CRR/SRR)
-
-
-Storage classes
-
-
-Event notifications
-
+Object Lock
 
 Transfer Acceleration
 
-
-Object Lock & Compliance mode
-
-
-Requester Pays
-
+You are fully ready 🔥🚀
 
 
 
