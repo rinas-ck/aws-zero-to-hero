@@ -1,17 +1,16 @@
 # ☁️ Amazon S3 (Simple Storage Service)
 
-Amazon S3 is a secure, scalable, and highly durable object storage service used for storing files, backups, media, logs, and more.
+Amazon S3 is a secure, scalable, and durable object storage service used for storing files, media, backups, logs, and more.
 
 ---
 
 ## ⭐ Features
 
 - Unlimited storage  
+- Highly durable  
 - Auto-scalable  
-- Highly durable (11 9’s durability)  
 - Max upload: **160GB (Console)**, **5TB (CLI)**  
-- Supports Multipart Upload for large files  
-- Global namespace (bucket names must be unique)
+- Multipart upload support  
 
 ---
 
@@ -19,59 +18,56 @@ Amazon S3 is a secure, scalable, and highly durable object storage service used 
 
 | Type | Description |
 |------|-------------|
-| **General Purpose** | Normal bucket |
-| **Directory Bucket** | Low-latency, performance-optimized |
-| **Table Bucket** | Tabular data, analytics-optimized |
+| General Purpose | Default bucket |
+| Directory Bucket | Fast low-latency |
+| Table Bucket | Tabular/analytics data |
 
 ---
 
 ## 🧱 Storage Types
 
-| Storage Type | Description |
-|-------------|-------------|
-| ☁️ **Object Storage – S3** | Store files, images, logs, apps |
-| 📦 **Block Storage – EBS** | Used by EC2 instances |
-| 📁 **File Storage – EFS** | Shared file system across EC2 |
+| Type | Description |
+|------|-------------|
+| Object Storage | Files, images, logs |
+| Block Storage | EC2 EBS volumes |
+| File Storage | EFS shared FS |
 
 ---
 
 # 🪣 S3 Bucket Management
 
 ### 🔁 Versioning
-Prevents overwriting files with the same name.  
-Types:
-- **Unversioned**
-- **Versioning Enabled**
-- **Suspended**
+- Unversioned  
+- Versioning Enabled  
+- Suspended  
 
 ---
 
 ## 🌐 Access Object via URL
 
-1. Enable ACLs  
-2. Disable “Block Public Access”  
+1. Enable ACL  
+2. Disable Block Public Access  
 3. Make object public  
 
 ---
 
 # 🔒 S3 ACL (Access Control List)
 
-| Type | Permissions |
-|------|-------------|
-| Bucket ACL | READ, WRITE |
-| Object ACL | READ, WRITE, READ_ACP, WRITE_ACP |
-| Single object | Independent ACL |
+| ACL Type | Permissions |
+|----------|-------------|
+| Bucket ACL | READ / WRITE |
+| Object ACL | READ / WRITE / ACP |
 
 ---
 
 # 🔐 S3 Encryption
 
-| Type | Where It Happens | Key Managed By |
-|------|------------------|----------------|
-| **Client-side** | Before upload | You |
-| **SSE-S3** | In S3 | AWS |
-| **SSE-KMS** | In S3 | KMS Keys |
-| **DSSE-KMS** | In S3 | AWS KMS (Dual key) |
+| Type | Happens In | Keys By |
+|------|------------|---------|
+| Client-side | Before upload | You |
+| SSE-S3 | S3 | AWS |
+| SSE-KMS | S3 | KMS |
+| DSSE-KMS | S3 | KMS (dual key) |
 
 ---
 
@@ -91,125 +87,115 @@ Types:
     }
   ]
 }
+```
 
-🌍 Replication (CRR & SRR)
+---
 
-Create source bucket
+# 🌍 Replication (CRR & SRR)
 
-Create destination bucket
+- Create source bucket  
+- Create destination bucket  
+- Enable versioning on both  
+- Open Replication  
+- IAM role auto-creates  
+- Select prefix to replicate  
 
-Enable versioning on both
+---
 
-Go to Replication
+## 🧪 Lab – Enable Replication
 
-Create IAM role automatically
+1. Bucket A in region-1  
+2. Bucket B in region-2  
+3. Enable versioning  
+4. Go to Replication  
+5. Add rule → choose bucket B  
+6. IAM role auto-created  
+7. Upload file → appears in B  
 
-Select prefix to replicate
+---
 
-🧪 Lab – Enable Replication (Step-by-Step)
+# 📦 Storage Classes & Lifecycle
 
-Create bucket A in region 1
+### 📌 Storage Classes
 
-Create bucket B in region 2
+- S3 Standard  
+- Standard IA  
+- One Zone IA  
+- Glacier Instant Retrieval  
+- Glacier Flexible Retrieval  
+- Glacier Deep Archive  
 
-Enable versioning on both
+---
 
-Open bucket A → Replication
+# 🔁 Lifecycle Rules
 
-Add rule → choose bucket B
+**Two actions:**
 
-IAM role auto-creates
+1. Transition  
+2. Expiration  
 
-Upload file → Verify in bucket B
+---
 
-📦 Storage Classes & Lifecycle
-📌 Storage Classes
-Class	Description
-🔵 S3 Standard	Frequent Access
-🟡 S3 Standard-IA	Infrequent access
-⚪ One Zone-IA	Cheaper IA, 1 AZ only
-🧊 S3 Glacier Instant Retrieval	Archive, milliseconds retrieval
-🧊 Glacier Flexible Retrieval	Minutes to hours
-🧊 Glacier Deep Archive	12 hours retrieval
-🔁 Lifecycle Configuration
+## 🧪 Lab – Lifecycle Rule
 
-Two actions:
+1. Open bucket → Management  
+2. Add rule  
+3. Add prefix  
+4. Transition to IA after 30 days  
+5. Expire after 365 days  
 
-Transition → Move to cheaper storage
+---
 
-Expiration → Delete after time
+# ⛔ Object Lock
 
-🧪 Lab – Lifecycle Rule
+- WORM protection  
+- Governance Mode  
+- Compliance Mode  
+- Legal Hold  
 
-Open bucket → Management tab
+---
 
-Create lifecycle rule
+# 📄 Server Access Logging
 
-Add prefix filter
+1. Create destination bucket  
+2. Enable logging in source  
+3. Logs stored automatically  
 
-Transition to IA after 30 days
+---
 
-Expire objects after 365 days
+# 📢 Event Notifications
 
-Save rule
+Triggered by:
+- Object Created  
+- Object Deleted  
+- Metadata Update  
 
-⛔ Object Lock
+Targets:
+- SNS  
+- SQS  
+- Lambda  
 
-Prevents deletion/modification.
+---
 
-Modes:
+# 🚀 Transfer Acceleration
 
-Governance Mode
+Uses CloudFront edge network for faster upload/download.
 
-Compliance Mode (Strict – cannot delete at all)
+---
 
-Legal Hold
+# 🧪 Lab – Public Access (ACL)
 
-📄 Server Access Logging
+1. Upload object  
+2. Enable ACL  
+3. Disable BPA  
+4. Make public  
+5. Open object URL  
 
-Steps:
+---
 
-Create destination bucket
+# 🧪 Lab – Public Bucket Policy
 
-Enable logging in source bucket (Properties → Logging)
-
-Logs start storing in destination bucket
-
-📢 S3 Event Notification
-
-Triggers on:
-
-Object Created
-
-Object Deleted
-
-Metadata Updated
-
-Destinations:
-
-SNS
-
-SQS
-
-Lambda
-
-🚀 S3 Transfer Acceleration
-
-Uses CloudFront global edge network for faster upload/download.
-
-🧪 Lab – Make Files Public (ACL)
-
-Upload object
-
-Enable ACL
-
-Disable “Block Public Access”
-
-Make object public
-
-Open the object URL
-
-🧪 Lab – Bucket Policy Public Read
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -218,64 +204,48 @@ Open the object URL
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::your-bucket-name/*"
+      "Resource": "arn:aws:s3:::your-bucket/*"
     }
   ]
 }
+```
 
-🗃️ S3 Batch Operations
+---
 
-Perform actions on millions of objects:
+# 🗃️ S3 Batch Operations
 
-Copy
+- Copy  
+- Delete  
+- Tag  
+- ACL updates  
+- Lambda per object  
 
-Delete
+---
 
-Tag
-
-Change ACL
-
-Invoke Lambda
-
-💸 S3 Requester Pays
+# 💸 Requester Pays
 
 Requester pays for:
+- Data download  
+- Transfer costs  
 
-Download
+---
 
-Data transfer
+# 🔐 VPC Endpoint for S3
 
-Used for public datasets.
+- Access S3 privately  
+- No internet needed  
 
-🔐 VPC Endpoint for S3
+---
 
-Connects S3 privately from VPC
+# 🎯 Interview Summary
 
-No internet or NAT needed
-
-🎉 Final Summary for Interviews
-
-Must-know S3 topics:
-
-Versioning
-
-Encryption (SSE-S3, KMS)
-
-Replication
-
-Bucket Policy vs ACL
-
-Lifecycle
-
-Storage Classes
-
-Event Notifications
-
-Object Lock
-
-Transfer Acceleration
-
-You are fully ready 🔥🚀
-
-
-
+You must know:
+- Versioning  
+- Encryption  
+- ACL vs Policy  
+- Replication  
+- Lifecycle  
+- Storage Classes  
+- Events  
+- Object Lock  
+- Transfer Acceleration  
