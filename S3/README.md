@@ -133,3 +133,180 @@ Modes:
     }
   ]
 }
+
+
+🔁 Replication (CRR / SRR)
+TypeMeaning🔄 CRRCross Region Replication🔁 SRRSame Region Replication
+🧪 Lab — Enable Replication
+
+
+Create Source Bucket + Destination Bucket
+
+
+Enable Versioning on both
+
+
+Go to Replication
+
+
+Create IAM role automatically
+
+
+Replicate selected prefix
+
+
+
+📦 Storage Classes & Lifecycle
+Storage Classes
+ClassUse Case💙 StandardFrequent access💛 Intelligent-TieringAuto-optimize cost🟧 Standard-IAInfrequent Access🟫 One-Zone IACheap infrequent❄️ GlacierArchive🧊 Deep ArchiveLowest cost long-term
+
+🔄 Lifecycle Configuration
+Two actions:
+
+
+Transition → move to cheaper storage
+
+
+Expiration → auto-delete objects
+
+
+🧪 Lab — Lifecycle Rule
+
+
+Go to Bucket → Management
+
+
+Create Rule
+
+
+Transition to IA after 30 days
+
+
+Expire after 1 year
+
+
+
+🔔 S3 Event Notifications
+Triggers on:
+
+
+PUT (create)
+
+
+DELETE
+
+
+Metadata changes
+
+
+Destinations:
+
+
+🔁 SQS
+
+
+📩 SNS
+
+
+🧠 Lambda
+
+
+🧪 Lab — Trigger Lambda on Upload
+
+
+Create Lambda
+
+
+Go to S3 → “Notifications”
+
+
+Configure PUT event
+
+
+Upload object
+
+
+Check CloudWatch logs
+
+
+
+⚡ S3 Transfer Acceleration
+
+
+Uses CloudFront global edge locations
+
+
+Faster uploads worldwide
+
+
+URL becomes:
+bucketname.s3-accelerate.amazonaws.com
+
+
+🧪 Lab
+
+
+Enable “Transfer Acceleration”
+
+
+Compare speed with normal upload
+
+
+
+🚨 S3 Requester Pays
+
+
+Requester pays for download + transfer, not bucket owner.
+
+
+🧪 Lab
+
+
+Enable “Requester Pays” in Properties
+
+
+Use AWS CLI from another account to download
+
+
+
+🌐 VPC Endpoint + S3
+
+
+Access S3 privately without internet
+
+
+No NAT Gateway required
+
+
+Uses Gateway VPC Endpoint
+
+
+Benefits:
+✔ Saves cost
+✔ More secure
+✔ Private traffic only
+
+💻 Useful S3 CLI Commands
+aws s3 ls
+aws s3 mb s3://mybucket
+aws s3 cp file.txt s3://mybucket/
+aws s3 rm s3://mybucket/file.txt
+aws s3 rb s3://mybucket --force
+
+
+🎯 Final Real-World Labs
+Lab 1 — Host Static Website
+✔ Create bucket
+✔ Upload index.html
+✔ Make public
+✔ Enable static hosting
+✔ Add bucket policy
+Lab 2 — Create Private Secure Bucket
+✔ Block Public Access
+✔ Enable KMS encryption
+✔ Access via IAM Role on EC2
+Lab 3 — S3 Backup System
+✔ Lifecycle Rules
+✔ Replication
+✔ Event → Lambda → SNS
+
