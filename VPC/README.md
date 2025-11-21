@@ -1,329 +1,976 @@
+----- PART 1 (COPY EVERYTHING BELOW THIS LINE) -----
+
 <div align="center">
 
-<kbd> AWS </kbd> <kbd> VPC NOTES </kbd>
+<img src="https://img.shields.io/badge/AWS%20Cloud-VPC%20Networking-black?style=for-the-badge&logo=amazonaws">
+
+<h1 style="color:#00eaff;">🌐 AWS VPC – Zero to Hero (Full Networking Guide)</h1>
+
+<p style="color:#bfbfbf;">
+Subnets • Routing • IGW • NAT • Endpoints • Peering • Transit Gateway • Labs Included
+</p>
 
 </div>
 
-# 🌐 Amazon VPC (Virtual Private Cloud)
+---
 
-Amazon VPC lets you create a **private, isolated network** inside AWS where you launch your resources (EC2, RDS, etc.).
+# 🌐 What is a VPC?
 
-You control:
+A **Virtual Private Cloud (VPC)** is your own isolated network inside AWS.  
+You control everything:
 
-- ✅ Your IP address range (CIDR)
-- ✅ Subnets (public / private)
-- ✅ Route tables
-- ✅ Internet / NAT gateways
-- ✅ Security Groups & Network ACLs
-- ✅ Connectivity (VPN, Direct Connect, Peering, Endpoints)
+- IP ranges (CIDR)
+- Public & Private subnets
+- Routing
+- Internet access
+- NAT connections
+- Security Groups & NACLs
+- VPN, Direct Connect
+- Peering
+- Transit Gateway
+- Endpoints
+- Flow logs
 
 ---
 
-## 🧠 Core Concepts
+# 🧠 CIDR (IP Address Range)
 
-### 🧩 VPC
+Your VPC starts with an IPv4 range called **CIDR Block**.
 
-- **VPC** = Virtual network in AWS.
-- Example CIDR: `10.0.0.0/16` → gives you many private IPs.
-- A VPC spans **all Availability Zones** in a Region.
+Example (most common):
+```
+10.0.0.0/16
+```
 
----
-
-### 🧱 Subnets
-
-Subnets are **slices of your VPC CIDR** inside specific AZs.
-
-- **Public Subnet**
-  - Has a route to the **Internet Gateway (IGW)**.
-  - Instances can have **public IPs** and reach internet directly.
-
-- **Private Subnet**
-  - **No direct route** to IGW.
-  - Uses **NAT Gateway** or **VPC endpoints** to reach internet / AWS services.
-
-**Public vs Private Subnet**
-
-| Type        | Route to 0.0.0.0/0          | Usage                                |
-|------------|-----------------------------|--------------------------------------|
-| Public     | Internet Gateway (IGW)      | ALB, Bastion, NAT GW, public EC2    |
-| Private    | NAT GW / No route / Endpoint| App servers, DB, internal services  |
+This gives:
+- 65,536 IPs  
+- Can be divided into multiple subnets  
 
 ---
 
-### 📐 CIDR Block
+# 🧱 Subnets (Public & Private)
 
-- CIDR = IP range of your network.
-- Example:
-  - VPC: `10.0.0.0/16`
-  - Public Subnet: `10.0.1.0/24`
-  - Private Subnet: `10.0.2.0/24`
+A **subnet** is a section of your VPC placed inside one specific Availability Zone.
 
----
+### **🔹 Public Subnet**
+- Has route to **Internet Gateway (IGW)**
+- Resources can receive public IPs
+- Used for:
+  - Load balancers
+  - Bastion hosts
+  - NAT Gateway
+  - Public EC2
 
-### 🚏 Route Tables
-
-- Define **where traffic goes**.
-- Routes are checked using **destination CIDR**.
-- Common destinations:
-  - `10.0.0.0/16` → `local` (always there, for inside VPC)
-  - `0.0.0.0/0` → `igw-xxxx` (internet)
-  - `0.0.0.0/0` → `nat-xxxx` (private → internet)
-  - `pl-xxxx` / specific CIDR → `vpce-xxxx` (VPC endpoints)
-
-Each subnet is **associated** with exactly **one** route table.
-
----
-
-### 🌍 Internet Gateway (IGW)
-
-- Horizontally scaled, redundant component that allows:
-  - **Inbound** traffic from internet to public resources.
-  - **Outbound** internet access from public subnets.
-- Must be:
-  1. **Created** in the VPC.
-  2. **Attached** to that VPC.
-  3. Referenced in a **route table** (`0.0.0.0/0 → igw-xxxx`).
+### **🔹 Private Subnet**
+- No direct route to the internet
+- Used for:
+  - Application servers
+  - Databases (RDS)
+  - Internal microservices
+  - Backend EC2
 
 ---
 
-### 🔁 NAT Gateway
+# 🌍 Internet Gateway (IGW)
 
-- Managed **Network Address Translation** service.
-- Placed in a **public subnet** with an Elastic IP.
-- Allows **instances in private subnets** to:
-  - Access internet **outbound** (updates, package installs).
-  - Block unsolicited **inbound** traffic from internet.
+Needed to allow:
 
-Route example for private subnet route table:
+- Public EC2 → Internet (Outbound)
+- Internet → Public EC2 (Inbound, if SG allows)
 
-- `0.0.0.0/0` → `nat-xxxxxxxx`
-
----
-
-### 🛡️ Security Groups vs NACLs
-
-**Security Group (SG)**
-
-- **Stateful** (response traffic is automatically allowed).
-- Attached to **ENI / EC2 / RDS**.
-- Rules are **allow-only** (no explicit deny).
-- Common usage: Allow SSH / HTTP / HTTPS to instance.
-
-**Network ACL (NACL)**
-
-- **Stateless** (need both inbound + outbound rules).
-- Attached to **subnets**.
-- Rules can be **allow or deny**.
-- Evaluated in **rule number order** (lowest first).
-
-| Feature             | Security Group          | NACL                         |
-|--------------------|-------------------------|------------------------------|
-| Scope              | ENI / Instance          | Subnet                       |
-| Stateful?          | ✅ Yes                  | ❌ No                        |
-| Allow / Deny       | Allow only              | Allow + Deny                |
-| Typical Use        | App-level firewall      | Subnet-level firewall       |
+To use IGW:
+1. Create IGW
+2. Attach to VPC
+3. Add route:
+```
+0.0.0.0/0 → igw-xxxxxxx
+```
 
 ---
 
-### 🔗 VPC Endpoints
+# 🛣 Route Tables
 
-Access AWS services **privately** without using public internet.
+Route tables decide **where traffic goes**.
 
-- **Gateway Endpoint**
-  - Target = Route table entry.
-  - Used for: **S3**, **DynamoDB**.
-- **Interface Endpoint**
-  - Elastic Network Interface (ENI) with private IP.
-  - Used for: many AWS services (SSM, CloudWatch, etc.).
+Every subnet must be associated with exactly **ONE** route table.
 
----
+### Example Public Route Table:
+```
+10.0.0.0/16   local
+0.0.0.0/0     igw-1234
+```
 
-### 🌉 VPC Peering & Transit Gateway (High Level)
-
-- **VPC Peering**
-  - Connects **two VPCs** (same or different accounts / regions).
-  - Non-transitive (A–B and B–C does **not** mean A–C).
-- **Transit Gateway (TGW)**
-  - Central hub to connect **many VPCs + VPNs**.
-  - Scales better than many peering connections.
+### Example Private Route Table (with NAT):
+```
+10.0.0.0/16   local
+0.0.0.0/0     nat-4567
+```
 
 ---
 
-## 🗺️ Typical 2-Tier VPC Design (Interview Friendly)
+# 🔁 NAT Gateway (For Private Subnets)
 
-Example design:
+Private instances cannot access the internet unless you add a **NAT Gateway**.
 
-- VPC: `10.0.0.0/16`
-- Public Subnets:
-  - `10.0.1.0/24` (AZ-a)
-  - `10.0.3.0/24` (AZ-b)
-- Private Subnets:
-  - `10.0.2.0/24` (AZ-a)
-  - `10.0.4.0/24` (AZ-b)
-- Internet Gateway attached.
-- NAT Gateways in each public subnet.
-- Route tables:
-  - Public: `0.0.0.0/0 → IGW`
-  - Private: `0.0.0.0/0 → NAT GW`
-- Security Groups:
-  - ALB SG: Allow HTTP/HTTPS from internet.
-  - App SG: Allow HTTP from ALB SG only.
-  - DB SG: Allow DB port from App SG only.
+- Deployed in **public subnet**
+- Has **Elastic IP**
+- Only **outbound** internet allowed
 
-This architecture is **great to explain in interviews**.
+Private subnet route table example:
+
+```
+0.0.0.0/0 → nat-xxxx
+```
+
+NAT is used for:
+- OS updates
+- Package installs (yum, apt)
+- Reaching public endpoints safely
+
+NAT does **NOT** allow inbound connections from internet.
+
+-----
+
+END OF PART 1
+
+----- PART 2  -----
+
+# 🛡️ Security Groups (SG)
+
+**Security Groups = Virtual Firewalls for EC2 / ENI / ALB / RDS**
+
+### ⭐ Features:
+- **STATEFUL** (if inbound allowed, outbound automatically allowed)
+- Apply at **instance level**
+- Only **ALLOW** rules (no deny)
+- Evaluate **all rules together**
+
+### Example:
+Inbound:
+- Port 22 (SSH) → My IP
+- Port 80 (HTTP) → 0.0.0.0/0
+
+Outbound:
+- All traffic allowed (default)
 
 ---
 
-## 🔧 LAB 1 – Create a Basic VPC (Console)
+# 🚫 Network ACL (NACL)
 
-🎯 Goal: Create custom VPC with one public and one private subnet.
+**Network ACL = Firewall for Subnets**
+
+### ⭐ Features:
+- **STATELESS** (need inbound + outbound rules)
+- Attached to **subnets**
+- Supports **allow + deny**
+- Rules processed by **rule number** (lowest first)
+
+### Use Cases:
+- Block a malicious IP
+- Allow-only specific CIDR ranges
+
+---
+
+# 🔐 SG vs NACL Comparison
+
+| Feature | Security Group | NACL |
+|--------|----------------|------|
+| Scope | Instance/ENI | Subnet |
+| Stateful | ✅ Yes | ❌ No |
+| Allows | Allow Only | Allow + Deny |
+| Rule Evaluation | All Together | Lowest rule first |
+| Use Case | App firewall | Network-level firewall |
+
+---
+
+# 🧵 Elastic Network Interface (ENI)
+
+A **virtual network card** attached to EC2.
+
+### Features:
+- Private IPs
+- Security groups
+- MAC address
+- Can move ENI between EC2 instances
+
+### Use Cases:
+- High availability
+- Multi-homed EC2
+- Network appliances
+
+---
+
+# 🌐 VPC Endpoints (Private AWS Access)
+
+VPC Endpoints allow access to AWS services **without internet**.
+
+---
+
+## 🔶 Gateway Endpoint
+Used for:
+- **S3**
+- **DynamoDB**
+
+Added to **route tables**.
+
+Example route table entry:
+```
+pl-xxxx (gateway endpoint)
+```
+
+---
+
+## 🔷 Interface Endpoint (AWS PrivateLink)
+Used for:
+- SSM
+- ECR
+- CloudWatch
+- KMS
+- Secrets Manager
+- Lambda
+- Many more…
+
+Creates:
+- Elastic Network Interface (ENI)
+- Private DNS name
+
+### Benefits:
+- No NAT needed
+- No IGW needed
+- More secure (private traffic)
+
+---
+
+# 📜 DHCP Option Sets
+
+Controls how EC2 gets:
+- DNS server
+- Domain name
+- NTP server
+
+Default:
+- AmazonProvidedDNS
+
+---
+
+# 🌐 IPv6 in VPC
+
+AWS supports **dual-stack** (IPv4 + IPv6).
+
+### IPv6 Features:
+- Globally unique
+- No NAT needed
+- You can assign /56 to VPC
+- Each subnet gets /64
+
+---
+
+# 📄 VPC Flow Logs
+
+Logs network traffic:
+
+- ACCEPT / REJECT
+- Source & destination
+- Ports
+- Packet count
+- Bytes count
+
+Flow logs can send data to:
+- CloudWatch Logs
+- S3
+
+### Uses:
+- Debug SG / NACL issues
+- Security investigation
+- Network visibility
+
+---
+
+# 🧰 Putting It All Together (Architecture Overview)
+
+```
+                 +----------------------------+
+                 |        PUBLIC SUBNET       |
+                 |----------------------------|
+Internet <-----> | IGW  | Bastion EC2         |
+                 |       NAT Gateway          |
+                 +----------------------------+
+                          |
+                          | Outbound Only
+                          v
+                 +----------------------------+
+                 |        PRIVATE SUBNET      |
+                 |----------------------------|
+                 | App EC2 | RDS | Internal   |
+                 | S3 via VPC Endpoint        |
+                 +----------------------------+
+```
+
+Your VPC now has:
+- Public EC2 (bastion)
+- Private EC2 (backend)
+- NAT gateway
+- S3 endpoint
+- Full routing control
+
+-----
+
+END OF PART 2
+
+----- PART 3  -----
+
+# 🧪 LAB 1 — Create a Full Custom VPC (Public + Private Subnets)
+
+🎯 **Goal:**  
+Build a full custom VPC with one public and one private subnet.
+
+---
+
+## 🔹 Step 1 — Create VPC
+
+1. Go to **VPC Console → Your VPCs → Create VPC**
+2. Choose:
+   - **VPC name:** aws-zero-to-hero-vpc
+   - **IPv4 CIDR:** `10.0.0.0/16`
+3. Create VPC
+
+---
+
+## 🔹 Step 2 — Create Public Subnet
+
+1. **Subnets → Create Subnet**
+2. Select VPC: `aws-zero-to-hero-vpc`
+3. Name: `public-subnet-a`
+4. AZ: `ap-south-1a`
+5. CIDR: `10.0.1.0/24`
+6. After creation:
+   - Select subnet → **Edit subnet settings**
+   - Enable **Auto-assign public IPv4**
+
+---
+
+## 🔹 Step 3 — Create Private Subnet
+
+1. **Subnets → Create**
+2. Name: `private-subnet-a`
+3. CIDR: `10.0.2.0/24`
+
+---
+
+## 🔹 Step 4 — Create & Attach Internet Gateway
+
+1. **Internet Gateways → Create**
+2. Name: `igw-zero-to-hero`
+3. Select IGW → **Attach to VPC**
+4. Choose: `aws-zero-to-hero-vpc`
+
+---
+
+## 🔹 Step 5 — Create Public Route Table
+
+1. **Route Tables → Create Route Table**
+   - Name: `public-rt`
+2. Routes → Add:
+```
+0.0.0.0/0 → igw-xxxxxx
+```
+3. Subnet Associations:
+   - Select `public-subnet-a`
+
+🎉 Public subnet ready.
+
+-----
+
+# 🧪 LAB 2 — Add NAT Gateway for Private Subnet
+
+🎯 Goal: Private EC2 gets **outbound internet** safely.
+
+---
+
+## 🔹 Step 1 — Create Elastic IP
+
+1. EC2 → **Elastic IPs**
+2. Allocate new Elastic IP
+
+---
+
+## 🔹 Step 2 — Create NAT Gateway
+
+1. **NAT Gateway → Create**
+2. Subnet: `public-subnet-a`
+3. Attach Elastic IP
+4. Wait until status = **Available**
+
+---
+
+## 🔹 Step 3 — Create Private Route Table
+
+1. **Route Tables → Create**
+   - Name: `private-rt`
+2. Routes → Add:
+```
+0.0.0.0/0 → nat-xxxxxxxx
+```
+3. Subnet Association:
+   - Select `private-subnet-a`
+
+🎉 Private subnet now has safe internet (outbound only).
+
+-----
+
+# 🧪 LAB 3 — Launch EC2 in Public Subnet (Bastion)
+
+🎯 Goal: Use this EC2 to SSH into private EC2 later.
+
+---
+
+## Steps:
+
+1. **EC2 → Launch instance**
+2. Name: `bastion-host`
+3. VPC: `aws-zero-to-hero-vpc`
+4. Subnet: `public-subnet-a`
+5. Auto-assign public IP: **Enable**
+6. Security Group:
+   - SSH (22) → **Your IP**
+7. Launch with your key pair
+
+🎉 Bastion ready.
+
+-----
+
+# 🧪 LAB 4 — Launch EC2 in Private Subnet
+
+🎯 Goal: Launch backend EC2 without public IP.
+
+---
+
+## Steps:
+
+1. **EC2 → Launch instance**
+2. Name: `private-app-ec2`
+3. Subnet: `private-subnet-a`
+4. Auto-assign public IP: **Disable**
+5. Security Group: `sg-private-app`
+   - SSH (22) → Source = **sg-bastion**
+6. Launch
+
+🎉 Private EC2 ready.
+
+-----
+
+# 🧪 LAB 5 — SSH Flow (Laptop → Bastion → Private EC2)
+
+## 🔹 Step 1 — Connect to Bastion EC2
+
+```
+ssh -i mykey.pem ec2-user@<Bastion-Public-IP>
+```
+
+## 🔹 Step 2 — From Bastion → Private EC2
+
+```
+ssh -i mykey.pem ec2-user@<Private-EC2-Private-IP>
+```
+
+You are now INSIDE the private subnet 💥
+
+-----
+
+# 🧪 LAB 6 — Configure S3 VPC Endpoint (NO NAT Needed)
+
+🎯 Goal: Private EC2 access S3 **without internet or NAT**.
+
+---
+
+## Steps:
+
+1. **VPC → Endpoints → Create Endpoint**
+2. Service: `com.amazonaws.<region>.s3`
+3. Type: **Gateway Endpoint**
+4. Select:
+   - VPC: `aws-zero-to-hero-vpc`
+   - Route table: `private-rt`
+5. Create
+
+Now test inside private EC2:
+
+```
+aws s3 ls
+```
+
+It works without internet 🎉
+
+-----
+
+# 🧪 LAB 7 — SG vs NACL Behavior Test
+
+🎯 Goal: Understand stateful vs stateless behavior.
+
+---
+
+## Steps:
+
+1. Edit NACL of public subnet.
+2. Add DENY rule:
+   - Inbound port 80 → Deny from `0.0.0.0/0`
+3. Try opening your web server public IP → **fails**
+4. Remove Deny → works again
+
+Conclusion:
+- SG is instance-level
+- NACL is subnet-level
+- NACL DENY overrides SG ALLOW
+
+-----
+
+END OF PART 3
+
+----- PART 4  -----
+
+# 🤝 VPC Peering (Connecting Two VPCs)
+
+A **VPC Peering connection** allows two VPCs to communicate **privately** using their private IP addresses.
+
+### ⭐ What Peering Allows:
+- EC2 (VPC A) → EC2 (VPC B)
+- Private communication
+- Low latency
+- Same-region or cross-region
+
+---
+
+# ⭐ When to Use VPC Peering
+
+Use peering when:
+- You have 2–3 VPCs
+- Simple 1-to-1 connectivity
+- Same-company / same-project VPCs
+- Need private, low-latency communication
+
+---
+
+# 🛑 VPC Peering Limitations
+
+❌ *No transitive peering*  
+Example:
+```
+VPC A — peered — VPC B — peered — VPC C
+```
+A **cannot** talk to C.
+
+❌ Cannot reference peered VPC security groups  
+❌ No overlapping CIDR blocks allowed  
+❌ Cannot use IPv6 from one region to another via peering  
+
+---
+
+# 🧪 LAB 8 — Create VPC Peering Between Two VPCs
+
+### 🎯 Goal:
+Connect:
+- **VPC-A : 10.0.0.0/16**
+- **VPC-B : 10.1.0.0/16**
+
+So EC2 in A can talk to EC2 in B via private IPs.
+
+---
+
+## 🔹 Step 1 — Create Second VPC (VPC-B)
 
 1. **Create VPC**
-   - Go to **VPC Console → Your VPCs → Create VPC**.
-   - Name: `aws-zero-to-hero-vpc`
-   - IPv4 CIDR: `10.0.0.0/16`
-   - Tenancy: Default
-   - Create VPC.
+   - Name: `vpc-b`
+   - CIDR: `10.1.0.0/16`
 
-2. **Create Public Subnet**
-   - **Subnets → Create subnet**
-   - VPC: `aws-zero-to-hero-vpc`
-   - Name: `public-subnet-a`
-   - AZ: choose `ap-south-1a` (example)
-   - CIDR: `10.0.1.0/24`
-   - After create → **Edit subnet settings** → enable  
-     `Auto-assign public IPv4 address`.
-
-3. **Create Private Subnet**
-   - Name: `private-subnet-a`
-   - AZ: same or different (e.g. `ap-south-1a`)
-   - CIDR: `10.0.2.0/24`
+2. Create subnets same as earlier:
+   - Public: `10.1.1.0/24`
+   - Private: `10.1.2.0/24`
 
 ---
 
-## 🔧 LAB 2 – Internet Access (IGW + NAT)
+## 🔹 Step 2 — Create Peering Connection
 
-🎯 Goal: Give **internet access** to public & private subnets correctly.
+1. Go to **VPC → Peering Connections**
+2. Create Peering Connection
+   - Requester VPC: `aws-zero-to-hero-vpc (A)`
+   - Accepter VPC: `vpc-b (B)`
 
-### 2.1 Attach Internet Gateway
-
-1. **Internet Gateways → Create internet gateway**
-   - Name: `aws-zero-to-hero-igw`
-2. Select IGW → **Actions → Attach to VPC**  
-   - Choose `aws-zero-to-hero-vpc`.
-
-### 2.2 Public Route Table
-
-1. **Route tables → Create route table**
-   - Name: `public-rt`
-   - VPC: `aws-zero-to-hero-vpc`.
-2. Select `public-rt` → **Routes → Edit routes**
-   - Add: `Destination: 0.0.0.0/0 → Target: Internet Gateway (igw-xxxx)`
-3. **Subnet associations**
-   - Associate `public-subnet-a` with `public-rt`.
-
-Now any instance in `public-subnet-a` with a **public IP** can reach internet.
+3. Click **Create**
 
 ---
 
-### 2.3 NAT Gateway for Private Subnet
+## 🔹 Step 3 — Accept Peering Request
 
-1. Create **Elastic IP** (EC2 → Network & Security → Elastic IPs).
-2. **NAT Gateways → Create NAT Gateway**
-   - Subnet: `public-subnet-a`
-   - Elastic IP: the one you created.
-3. Wait until NAT GW becomes **Available**.
-4. **Route tables → Create route table**
-   - Name: `private-rt`
-   - VPC: `aws-zero-to-hero-vpc`.
-5. **Routes → Edit routes** on `private-rt`
-   - `Destination: 0.0.0.0/0 → Target: nat-xxxxxxxx`.
-6. **Subnet associations**
-   - Associate `private-subnet-a` with `private-rt`.
-
-✅ Now:
-- Public subnet → IGW.
-- Private subnet → NAT → internet (outbound only).
+1. In the same menu:
+2. Select the peering connection
+3. Click **Accept Request**
 
 ---
 
-## 🔧 LAB 3 – Security Groups vs NACL
+## 🔹 Step 4 — Update Route Tables
 
-🎯 Goal: Understand traffic control at **instance** vs **subnet** level.
+### In VPC A route table:
 
-### 3.1 Security Group
+Add:
+```
+Destination: 10.1.0.0/16
+Target: pcx-xxxxxx
+```
 
-1. Go to **EC2 → Security Groups → Create security group**
-   - Name: `web-sg`
-   - VPC: `aws-zero-to-hero-vpc`
-2. Inbound rules:
-   - HTTP (80) → Source: `0.0.0.0/0`
-   - SSH (22) → Source: your IP.
-3. Launch an EC2 instance in `public-subnet-a` with `web-sg`.
-4. Test:
-   - `ping` from your machine.
-   - `curl` the instance public IP (after installing a web server).
+### In VPC B route table:
 
-### 3.2 NACL
-
-1. **Network ACLs → Create network ACL**
-   - Name: `public-nacl`
-   - VPC: `aws-zero-to-hero-vpc`.
-2. Inbound rules:
-   - 100: Allow HTTP (80) from `0.0.0.0/0`
-   - 110: Allow ephemeral ports `1024-65535` from `0.0.0.0/0`
-3. Outbound rules:
-   - 100: Allow `0.0.0.0/0` (all traffic).
-4. **Subnet associations**
-   - Associate `public-subnet-a` with `public-nacl`.
-
-📝 Try adding a **Deny** rule for your own IP and see how it blocks you even if SG allows it. Great learning!
+Add:
+```
+Destination: 10.0.0.0/16
+Target: pcx-xxxxxx
+```
 
 ---
 
-## 🔧 LAB 4 – S3 Gateway VPC Endpoint
+## 🔹 Step 5 — Test EC2 Communication
 
-🎯 Goal: Access S3 from private subnet **without NAT / internet**.
+Launch EC2 in:
+- VPC A: 10.0.1.x
+- VPC B: 10.1.1.x
 
-1. (Optional) Stop using NAT (remove `0.0.0.0/0 → NAT` from `private-rt`).
-2. **Endpoints → Create endpoint**
-   - Service category: AWS services.
-   - Service: `com.amazonaws.<region>.s3`
-   - Type: **Gateway**
-   - VPC: `aws-zero-to-hero-vpc`
-   - Route tables: select `private-rt`.
-3. Launch a small EC2 in `private-subnet-a`.
-4. From that instance:
-   - Use AWS CLI:  
-     `aws s3 ls s3://your-bucket-name`
-5. It works through the **VPC endpoint**, no internet.
+From EC2-A:
+```
+ping 10.1.1.10
+```
+
+If SG allows → ping works.
+
+🎉 **VPC Peering successful!**
 
 ---
 
-## 🔧 LAB 5 – VPC Peering (Bonus)
+# 🏛 Transit Gateway (TGW) — Advanced Multi-VPC Networking
 
-🎯 Goal: Connect two VPCs so they can talk using **private IPs**.
+Transit Gateway is AWS’s **network hub** that connects:
 
-1. Create another VPC:
-   - `10.1.0.0/16` with one subnet.
-2. **VPC Peering → Create peering connection**
-   - Requester: `aws-zero-to-hero-vpc`
-   - Accepter: `10.1.0.0/16` VPC (same account).
-3. **Accept** peering request.
-4. Update **route tables**:
-   - In `aws-zero-to-hero-vpc` route table → add `10.1.0.0/16 → pcx-xxxx`
-   - In second VPC route table → add `10.0.0.0/16 → pcx-xxxx`
-5. Launch EC2 instances in each VPC and ping using **private IPs**.
+- Many VPCs
+- VPN connections
+- Direct Connect
+- On-prem networks
+- Inter-region traffic (if enabled)
 
 ---
 
-## 📝 Quick Interview Points (VPC)
+# ⭐ Why Use TGW Instead of Peering?
 
-- VPC is a **logically isolated network** inside AWS.
-- Public subnet = route to **IGW**, private subnet = route to **NAT / no internet**.
-- **Security Groups** are stateful, instance-level; **NACLs** are stateless, subnet-level.
-- NAT Gateway gives **outbound internet** to private subnets.
-- VPC Endpoints let you access AWS services **without public internet**.
-- VPC Peering is **non-transitive**; Transit Gateway centralizes many connections.
+| Feature | Peering | Transit Gateway |
+|--------|---------|------------------|
+| Best for | 2–3 VPCs | 10+ VPCs |
+| Transitive routing | ❌ No | ✅ Yes |
+| Complexity | Simple | Enterprise-level |
+| Scalability | Limited | Very high |
+| Route management | Manual | Central |
 
 ---
+
+# 🧠 TGW Core Concepts
+
+### 1️⃣ **Transit Gateway**
+The central hub.
+
+### 2️⃣ **Transit Gateway Attachment**
+Connection between TGW and:
+- VPC
+- VPN
+- DX
+- Another TGW
+
+### 3️⃣ **TGW Route Table**
+Controls which attachment can talk to which.
+
+---
+
+# 🧪 LAB 9 — Transit Gateway with Two VPCs
+
+🎯 Goal: Connect **3 VPCs** through TGW:
+
+```
+            +----------------+
+            |  Transit GW    |
+            +----------------+
+             /       |        \
+         VPC A    VPC B     VPC C
+```
+
+All VPCs should communicate via TGW.
+
+---
+
+## 🔹 Step 1 — Create 3 VPCs
+
+### VPC-A:
+```
+10.0.0.0/16
+```
+
+### VPC-B:
+```
+10.1.0.0/16
+```
+
+### VPC-C:
+```
+10.2.0.0/16
+```
+
+Each VPC should have:
+- 1 public subnet
+- 1 private subnet
+- Route tables created (local only for now)
+
+---
+
+## 🔹 Step 2 — Create Transit Gateway
+
+1. Go to **VPC → Transit Gateways**
+2. Create TGW
+3. Default settings are OK
+
+---
+
+## 🔹 Step 3 — Create Attachments
+
+For each VPC, create attachment:
+
+1. **Transit Gateway Attachments → Create attachment**
+2. Type: **VPC**
+3. Choose:
+   - TGW
+   - VPC (A, B, C)
+   - Subnets: pick 1 subnet per AZ
+
+Repeat for:
+- VPC-A
+- VPC-B
+- VPC-C
+
+---
+
+## 🔹 Step 4 — Update TGW Route Table
+
+Default route table:
+```
+10.0.0.0/16 → tgw-attach-A
+10.1.0.0/16 → tgw-attach-B
+10.2.0.0/16 → tgw-attach-C
+```
+
+TGW is now central hub.
+
+---
+
+## 🔹 Step 5 — Update VPC Route Tables
+
+### In VPC-A route table:
+```
+10.1.0.0/16 → tgw-attach-A
+10.2.0.0/16 → tgw-attach-A
+```
+
+### In VPC-B route table:
+```
+10.0.0.0/16 → tgw-attach-B
+10.2.0.0/16 → tgw-attach-B
+```
+
+### In VPC-C route table:
+```
+10.0.0.0/16 → tgw-attach-C
+10.1.0.0/16 → tgw-attach-C
+```
+
+---
+
+## 🔹 Step 6 — Test Communication
+
+Launch EC2 in each VPC:
+
+- EC2-A → 10.0.x.x  
+- EC2-B → 10.1.x.x  
+- EC2-C → 10.2.x.x  
+
+From EC2-A:
+```
+ping 10.1.5.10
+ping 10.2.3.20
+```
+
+Everything should work.
+
+🎉 **TGW fully working. Multi-VPC communication achieved.**
+
+-----
+
+END OF PART 4
+
+----- PART 5  -----
+
+# 📡 VPN & Direct Connect (High-Level Overview)
+
+### 🔹 Site-to-Site VPN
+- Connect on-prem data center to AWS VPC.
+- Uses **public internet**.
+- IPSec encrypted.
+
+### 🔹 Direct Connect
+- Dedicated private fiber link.
+- Not internet-based.
+- High bandwidth (1Gbps–100Gbps).
+- Lower latency & more stable.
+
+Use Cases:
+- Hybrid cloud
+- Large data migrations
+- Secure enterprise workloads
+
+---
+
+# 📜 DNS in VPC (Route 53 Resolver)
+
+Every VPC has:
+- DNS hostname option
+- DNS resolution option
+
+Route 53 Resolver:
+- Outbound endpoint (VPC → on-prem DNS)
+- Inbound endpoint (on-prem → VPC DNS)
+
+---
+
+# 🧩 Multi-AZ Architecture Best Practices
+
+- Spread subnets across **at least 2 AZs**
+- Public Subnets:
+  - ALB, NAT Gateways
+- Private Subnets:
+  - EC2 Apps, RDS
+- Highly available NAT:
+  - 1 NAT per AZ (best practice)
+
+Architecture sample:
+
+```
+          +------------------+
+ Internet |       ALB        |
+--------->|  Public Subnet A |
+          +------------------+
+               |        |
+               v        v
+        Private A   Private B
+         App EC2     App EC2
+```
+
+---
+
+# 📊 VPC Flow Logs – Deeper Example
+
+Example flow log entry:
+```
+2 123456789 vpc-xx eni-xx 10.0.1.10 10.1.2.5 443 52054 6 10 840 1617902400 ACCEPT OK
+```
+
+Meaning:
+- Source IP: 10.0.1.10
+- Destination IP: 10.1.2.5
+- Ports: 443 & 52054
+- ACCEPT → allowed by SG/NACL
+
+---
+
+# 🧩 Common VPC Architectures
+
+### 🔹 1. Public + Private 2-Tier App
+- Public: ALB, Bastion, NAT
+- Private: EC2 app, RDS
+
+### 🔹 2. VPC Peering Mesh
+For 3–4 VPCs max.
+
+### 🔹 3. Transit Gateway Hub
+For 10+ VPCs enterprise networks.
+
+### 🔹 4. VPC with S3 Endpoint only (cost-save)
+No NAT → access S3 via endpoint only.
+
+---
+
+# 💼 Interview Questions (Real AWS/DevOps Questions)
+
+This section makes your README **interview-ready** 💥
+
+### ⭐ **Core Concepts**
+1. What is a VPC?
+2. Difference between public and private subnets.
+3. What is CIDR?
+4. What resources can be in public subnet?
+5. Why do private subnets need NAT Gateway?
+
+---
+
+### ⭐ **Routing & Security**
+6. What is Internet Gateway?
+7. How do Route Tables work?
+8. Difference between SG and NACL.
+9. What is the difference between stateful and stateless?
+10. Why is NACL deny useful?
+
+---
+
+### ⭐ **Advanced**
+11. What is VPC endpoint? Types?
+12. What is VPC Peering? Why no transitive routing?
+13. What is Transit Gateway?
+14. When to use TGW instead of peering?
+15. How does Bastion → Private EC2 SSH work?
+
+---
+
+### ⭐ **Bonus**
+16. What are VPC Flow Logs?
+17. What is DNS hostname vs DNS resolution?
+18. What is DHCP Option Set?
+19. What is Virtual Private Gateway (VGW)?
+20. What is Direct Connect?
+
+---
+
+# 🏁 Final Summary (What You Learned)
+
+By now you understand the entire AWS VPC networking flow:
+
+### ✔ IP addressing & CIDR  
+### ✔ Public vs Private subnets  
+### ✔ Route tables (local, IGW, NAT rules)  
+### ✔ Internet Gateway (public routing)  
+### ✔ NAT Gateway (private outbound internet)  
+### ✔ Security Groups (stateful)  
+### ✔ NACLs (stateless, subnet firewall)  
+### ✔ VPC Endpoints (private S3/Service access)  
+### ✔ ENIs, DHCP, IPv6  
+### ✔ Flow Logs (network logging)  
+### ✔ VPC Peering (simple VPC-to-VPC)  
+### ✔ Transit Gateway (enterprise multi-VPC)  
+### ✔ FULL labs:
+- Custom VPC
+- Public EC2
+- Private EC2
+- Bastion SSH
+- NAT Gateway
+- S3 Endpoint
+- SG vs NACL
+- VPC Peering
+- Transit Gateway
+
+Congrats bro — **your VPC README is now better than 90% DevOps candidates**.
+
+-----
+
+END OF PART 5
+
+
+
