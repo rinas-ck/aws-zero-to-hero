@@ -1,178 +1,154 @@
 
 ---
 
-# 🖥️ Amazon EC2 — Zero to Hero
+# 🚀 Amazon EC2 – Zero to Hero
 
-A complete, practical guide to **Amazon EC2** for AWS & DevOps interviews — with **theory + labs** in one place.
+## 💡 What is Amazon EC2?
 
----
+Amazon EC2 (**Elastic Compute Cloud**) is a web service that provides scalable, on-demand virtual servers in the AWS Cloud (**instances**).
 
-## 💡 1. What is Amazon EC2?
-
-**Amazon EC2 (Elastic Compute Cloud)** is a web service that provides scalable virtual servers (called **instances**) in the AWS Cloud.
-
-* Run applications on-demand
-* Scale up/down easily
+* Launch servers in minutes
+* Scale up/down based on traffic
 * Pay only for what you use
 
-When you launch an EC2 instance, you choose:
+---
 
-* **AMI** → OS image (Amazon Linux, Ubuntu, Windows, etc.)
-* **Instance Type** → CPU, RAM, network performance
-* **Storage** → EBS volumes / Instance store
-* **Network** → VPC, Subnet, Security Group
-* **Key Pair** → SSH / RDP access
+## 🧱 EC2 Basics
+
+* **Instance** → Virtual server in AWS
+* **AMI (Amazon Machine Image)** → Template with OS + software
+* **Instance Type** → Hardware (CPU, RAM, network performance)
+* **EBS Volume** → Disk attached to instance
+* **Security Group** → Virtual firewall
+* **Key Pair** → SSH/RDP login credentials
 
 ---
 
-## 🧱 2. Lab: Install Apache on Amazon Linux (Web Server)
+## 🧪 LAB 1 – Launch & Connect to an EC2 (Amazon Linux)
 
-### 🧪 Lab 1 — Install Apache on EC2 (Amazon Linux)
+1. Go to **EC2 → Instances → Launch Instance**
+2. Choose AMI: **Amazon Linux 2**
+3. Choose Instance Type: `t2.micro` (Free tier)
+4. Create / select **Key Pair** (for SSH)
+5. Configure **Security Group**:
 
-**Goal:** Launch an EC2 instance and install Apache HTTP Server.
-
-1️⃣ **Launch an EC2 Instance**
-
-* AMI: **Amazon Linux 2**
-* Instance Type: `t2.micro`
-* Network:
-
-  * VPC + Public Subnet
-  * Auto-assign Public IP: **Enable**
-* Security Group:
-
-  * Allow **SSH (22)** from your IP
-  * Allow **HTTP (80)** from `0.0.0.0/0`
-
-2️⃣ **Connect to Instance (SSH)**
+   * Allow **SSH (22)** from your IP
+6. Launch instance
+7. Connect via terminal:
 
 ```bash
-ssh -i mykey.pem ec2-user@<PUBLIC-IP>
+ssh -i your-key.pem ec2-user@<public-ip>
 ```
 
-3️⃣ **Become root**
+---
+
+## 🌐 Install Apache HTTP Server (Amazon Linux)
+
+Default web directory:
 
 ```bash
+/var/www/html
+```
+
+### 🧪 LAB 2 – Install & Test Apache
+
+```bash
+# Become root
 sudo su
-```
 
-4️⃣ **Install Apache**
-
-```bash
+# Install Apache
 yum install httpd -y
-```
 
-5️⃣ **Check Apache status**
-
-```bash
+# Check status
 systemctl status httpd
-```
 
-6️⃣ **Start Apache if inactive**
-
-```bash
+# If inactive, start it
 systemctl start httpd
-systemctl enable httpd   # start on reboot
+
+# Enable on boot
+systemctl enable httpd
 ```
 
-7️⃣ **Test from Browser**
+Now:
 
-* Copy EC2 **Public IP**
-* Open: `http://<PUBLIC-IP>`
+* Open browser → `http://<EC2-Public-IP>`
+* If not loading:
 
-If it doesn’t work → Security Group must allow **HTTP (80)**.
+  * Go to **Security Group → Inbound Rules**
+  * Add: **HTTP (Port 80) – 0.0.0.0/0**
 
-8️⃣ **Uninstall Apache (optional)**
+To remove Apache:
 
 ```bash
 yum remove httpd -y
 ```
 
-📂 **Default web directory:**
-
-```text
-/var/www/html
-```
-
 ---
 
-## 🎨 3. Host a Custom Website (Apache + HTML + Template)
+## 🎨 Host a Custom Website (Apache)
 
-### 🧪 Lab 2 — Simple Custom Website
-
-1️⃣ **Go to web directory**
+### 🧪 LAB 3 – Simple HTML Page
 
 ```bash
+# Go to default web folder
 cd /var/www/html
-```
 
-2️⃣ **Create home page**
-
-```bash
+# Create index.html
 sudo vi index.html
 ```
 
-Example content:
+Paste some HTML:
 
 ```html
-<h1>Welcome to My EC2 Website</h1>
-<p>Deployed on Apache HTTP Server</p>
+<h1>Hello from EC2 Apache!</h1>
+<p>Deployed on Amazon Linux</p>
 ```
 
-3️⃣ **Save & exit** (`:wq`)
-
-4️⃣ **Access in browser**
+Save (`:wq`), then open:
 
 ```text
-http://<EC2-PUBLIC-IP>
+http://<EC2-Public-IP>
 ```
+
+Your page should load 🎉
 
 ---
 
-### 🧪 Lab 3 — Use External HTML/CSS Template
+## 🎨 Use a Custom HTML/CSS Template (Apache)
 
-1️⃣ **Install `wget` and `unzip`**
-
-```bash
-yum install wget unzip -y
-```
-
-2️⃣ **Download template**
+### 🧪 LAB 4 – Import Template
 
 ```bash
+cd /var/www/html
+
+# Install unzip if needed
+sudo yum install unzip -y
+
+# Download template
 wget <link-to-template.zip>
-```
 
-3️⃣ **Unzip**
+# Unzip
+unzip <file.zip>
 
-```bash
-unzip template.zip
-```
-
-4️⃣ **Move files to web root**
-
-```bash
+# Move content to web root (optional)
 mv * /var/www/html
 ```
 
-5️⃣ **Open browser**
-
-* Visit `http://<PUBLIC-IP>`
-* You should see your **CSS-based template**.
+Then open `http://<EC2-Public-IP>` → template website should appear.
 
 ---
 
-## ⚙️ 4. Nginx on Amazon Linux
+## ⚙️ NGINX on EC2 (Amazon Linux)
 
-**Nginx** is a high-performance web server and reverse proxy.
+**Nginx** is a high-performance web server, reverse proxy and load balancer.
 
-📂 Default directory (Amazon Linux):
+Default directory (Amazon Linux):
 
-```text
+```bash
 /usr/share/nginx/html
 ```
 
-### 🧪 Lab 4 — Install and Run Nginx
+### 🧪 LAB 5 – Install NGINX
 
 ```bash
 sudo yum install nginx -y
@@ -180,232 +156,217 @@ sudo systemctl start nginx
 sudo systemctl enable nginx
 ```
 
-Visit: `http://<PUBLIC-IP>`
+Test:
 
----
+```text
+http://<EC2-Public-IP>
+```
 
-### 🧪 Lab 5 — Custom Site with Nginx
-
-1️⃣ **Go to directory**
+### 🧪 LAB 6 – Custom Website with NGINX
 
 ```bash
 cd /usr/share/nginx/html
 sudo rm -rf *
-```
 
-2️⃣ **Create page**
-
-```bash
 sudo vi index.html
 ```
 
-```html
-<h1>Hello from Nginx on EC2!</h1>
-```
-
-3️⃣ **Save & test in browser**
+Add HTML → Save → Refresh browser.
 
 ---
 
-## 🐧 5. EC2 with Ubuntu (Apache + Nginx)
+## 🐧 EC2 with Ubuntu
 
-### 🧪 Lab 6 — Apache on Ubuntu
+* Default user: `ubuntu`
+* Package manager: `apt`
 
-User: `ubuntu`
-Package manager: `apt`
+### Apache on Ubuntu
 
 ```bash
 sudo apt update
 sudo apt install apache2 unzip -y
+
 cd /var/www/html
 ```
 
-Same steps: edit `index.html`, browse to `http://<PUBLIC-IP>`.
-
-### 🧪 Lab 7 — Nginx on Ubuntu
+### NGINX on Ubuntu
 
 ```bash
 sudo apt update
 sudo apt install nginx -y
-```
 
-Default web root usually:
-
-```text
-/var/www/html
+# Default web root usually:
+cd /var/www/html
 ```
 
 ---
 
-## 🪟 6. Windows EC2 + IIS Web Server
+## 🔁 Proxy Concepts
 
-### 🧪 Lab 8 — Windows Server + IIS
+### 🔹 Forward Proxy
 
-1️⃣ Launch a **Windows Server** EC2 instance.
-2️⃣ Connect using **RDP**:
+* Sits **in front of clients**
+* Client → Proxy → Internet
+* Used for filtering, caching, monitoring
 
-* EC2 Console → Select Instance → **Connect**
-* Go to **RDP Client**
-* Upload `.pem` Key Pair → Decrypt password
-* Download RDP file → Open → Paste password.
+### 🔹 Reverse Proxy
 
-3️⃣ Install **IIS**:
+* Sits **in front of servers**
+* Client → Reverse Proxy → Backend
+* Used for load balancing, SSL offloading, hiding internal structure
 
-* Open **Server Manager**
-* Choose **Add Roles and Features**
-* Select **Web Server (IIS)** → Install.
+NGINX is often used as a **reverse proxy**.
 
-4️⃣ Test:
+---
 
-* Open browser inside or outside
-* Go to `http://<PUBLIC-IP>`
+## 🪟 EC2 (Windows) + IIS Web Server
 
-Default path:
+### 🧪 LAB 7 – Connect to Windows Instance
+
+1. Launch Windows AMI (e.g., Windows Server)
+2. Allow **RDP (3389)** in Security Group
+3. Select instance → **Connect → RDP Client**
+4. Upload **Key Pair** → Decrypt password
+5. Download RDP file and open in Remote Desktop app
+6. Use decrypted password to log in
+
+### 🧪 LAB 8 – Install IIS
+
+1. Open **Server Manager**
+2. **Add Roles and Features**
+3. Select **Web Server (IIS)**
+4. Complete installation
+5. Open browser inside server, go to `http://localhost` or from outside using EC2 public IP
+
+Default web root:
 
 ```text
 C:\inetpub\wwwroot
 ```
 
-Create or edit:
-
-```text
-index.html
-```
+Create `index.html` there.
 
 ---
 
-## 🧩 7. AMI (Amazon Machine Image)
+## 🧱 AMI – Amazon Machine Image
 
-### 📘 What is an AMI?
+### What is AMI?
 
-A template used to launch EC2 instances with:
+A template to launch instances with:
 
 * OS
-* Installed software
-* Configuration
+* Pre-installed software
+* Configurations
 * Attached volumes
 
-Types:
+### Types of AMIs
 
-* **AWS-provided AMIs**
-* **Marketplace AMIs**
-* **Custom AMIs** (created by you)
+* AWS Provided
+* Marketplace
+* Custom (created from your own instance)
 
----
+### 🧪 LAB 9 – Create Custom AMI
 
-### 🧪 Lab 9 — Create Custom AMI from EC2
-
-1️⃣ Setup EC2 (install Apache, app, tools).
-2️⃣ EC2 Console → Select Instance →
-**Actions → Image and templates → Create Image**.
-3️⃣ Give name → Create.
-4️⃣ Check under **Images → AMIs**.
-5️⃣ Launch new instances from this AMI anytime.
+1. Configure an EC2 instance the way you like
+2. EC2 → Instances → Select → **Actions → Images and Templates → Create Image**
+3. Give name & description
+4. Check in **EC2 → AMIs**
+5. Launch new instances from your custom AMI
 
 ---
 
-## 💾 8. EC2 Storage: Instance Store vs EBS
+## 💾 Block Storage – EBS & Instance Store
 
-### 📦 1. Instance Store (Ephemeral)
+### 1️⃣ Instance Store (Ephemeral)
 
-* Physically attached to the host
-* Very fast, **temporary**
-* Data lost if instance stops/terminates
-* Good for **cache** or temporary data
+* Physically attached to host
+* Very fast, **BUT** data lost when instance stops/terminates
+* Good for cache / temporary data
 
-### 📦 2. EBS (Elastic Block Store)
+### 2️⃣ EBS – Elastic Block Store
 
-* Network-attached, **persistent**
-* Survives instance stop/start
-* Can be detached/attached to instances
+* Network-attached persistent storage
+* Data survives stop/start and reboots
+* Can attach/detach between instances (same AZ)
 * Supports **snapshots**
 
-### ⚙️ EBS Volume Types (High-Level)
+### ⚙️ EBS Volume Types (Common)
 
-| Type  | Category | Use Case                        |
-| ----- | -------- | ------------------------------- |
-| gp2/3 | SSD      | General workloads, boot volumes |
-| io1/2 | SSD      | High IOPS, databases            |
-| st1   | HDD      | Big data, streaming             |
-| sc1   | HDD      | Cold, infrequent access         |
+**SSD (general):**
+
+* `gp2` / `gp3` → General purpose, boot volumes
+
+**SSD (IOPS-optimized):**
+
+* `io1` / `io2` → High IOPS, databases
+
+**HDD:**
+
+* `st1` → Throughput-optimized (big data)
+* `sc1` → Cold, cheap storage
 
 ---
 
-## 🧪 Lab 10 — Attach and Mount New EBS Volume (Linux)
+## 🧪 LAB 10 – Attach & Mount New EBS Volume
 
-1️⃣ **Create Volume**
-
-* EC2 → **Elastic Block Store → Volumes**
-* Create volume in same **AZ** as instance
-* Attach to instance (e.g. `/dev/xvdb`)
-
-2️⃣ **Check disk**
+1. EC2 → **Elastic Block Store → Volumes → Create Volume**
+2. Choose size, type, AZ (same as instance)
+3. **Actions → Attach Volume** to your instance
+4. Connect via SSH:
 
 ```bash
-lsblk
+lsblk          # See new disk, e.g., /dev/xvdb
+
 sudo file -s /dev/xvdb
-```
+sudo mkfs -t ext4 /dev/xvdb     # Format
 
-3️⃣ **Create filesystem**
-
-```bash
-sudo mkfs -t ext4 /dev/xvdb
-```
-
-4️⃣ **Create mount point & mount**
-
-```bash
 sudo mkdir /mnt/data
 sudo mount /dev/xvdb /mnt/data
+
+lsblk          # Confirm mount
 ```
 
-5️⃣ **Verify**
+### Permanent Mount (fstab)
 
 ```bash
-lsblk
-df -h
+sudo vi /etc/fstab
 ```
 
-6️⃣ **Make it persistent (on reboot)**
-
-Edit `/etc/fstab`:
+Add line:
 
 ```text
 /dev/xvdb /mnt/data ext4 defaults,nofail 0 2
 ```
 
+Now it remounts on reboot ✅
+
 ---
 
-## 📸 9. EBS Snapshots
+## 📸 EBS Snapshots
 
-* **Point-in-time** backup of EBS volume
+* Point-in-time backup of EBS volume
+* Incremental
 * Stored in S3 (managed by AWS)
-* **Incremental** (only changed blocks)
-* Used to:
+* Can be used to:
 
-  * Restore data
-  * Create new volumes
-  * Create AMIs
+  * Restore volume
+  * Create new AMI
+  * Copy across regions
 
-### 🧪 Lab 11 — Create Snapshot & Restore
+### 🧪 LAB 11 – Snapshot & Restore
 
-1️⃣ EC2 → Volumes → Select Volume → **Create Snapshot**.
-2️⃣ Later → Snapshots → **Create Volume from Snapshot**.
-3️⃣ Attach new volume to EC2 & mount.
+1. Select Volume → **Actions → Create Snapshot**
+2. EC2 → **Snapshots**
+3. Create Volume from Snapshot
+4. Attach to instance and mount:
+
+```bash
+sudo mount -t xfs -o nouuid /dev/xvdb1 /mnt/mount
+```
 
 ---
 
-## ⚙️ 10. EC2 Instance Types & Naming
-
-### 🧠 Instance Families
-
-* **General Purpose:** `t`, `m` (balanced CPU/RAM)
-* **Compute Optimized:** `c` (high CPU)
-* **Memory Optimized:** `r`, `x` (databases, in-memory)
-* **Storage Optimized:** `i`, `d` (high I/O)
-* **Accelerated Computing:** `g`, `p` (GPU)
-
-### 🔤 Naming Convention
+## ⚙️ EC2 Instance Types
 
 Format:
 
@@ -415,88 +376,76 @@ Format:
 
 Examples:
 
-* `t2.micro` → General, gen2, micro
-* `c5.large` → Compute, gen5, large
-* `r6g.xlarge` → Memory, gen6, Graviton
+* `t2.micro` → General purpose, small
+* `c5.large` → Compute optimized
+* `r5.xlarge` → Memory optimized
+* `i3.2xlarge` → Storage optimized
+* `g4dn.4xlarge` → GPU for ML/graphics
 
 ---
 
-## 💸 11. EC2 Purchasing Options
+## 💸 EC2 Purchasing Options
 
-| Option                  | Description                           | Best For                           |
-| ----------------------- | ------------------------------------- | ---------------------------------- |
-| On-Demand               | Pay per hour/second                   | Short-term, unpredictable workload |
-| Reserved Instances (RI) | 1–3 year commit, big discount         | Stable long-term workloads         |
-| Savings Plans           | Commit $/hr usage for 1–3 years       | Flexible usage types               |
-| Spot Instances          | Use spare capacity, up to 90% cheaper | Fault-tolerant batch/CI jobs       |
-| Dedicated Hosts         | Physical server reserved for you      | Compliance/licensing               |
-| Dedicated Instances     | Isolated hardware (AWS-managed)       | Extra isolation                    |
-| Capacity Reservations   | Reserve capacity in specific AZ       | Critical apps needing capacity     |
+| Option                | Description                                    | Use Case                           |
+| --------------------- | ---------------------------------------------- | ---------------------------------- |
+| On-Demand             | Pay per second/hour                            | Unpredictable workloads            |
+| Reserved Instances    | 1 or 3-year commitment, big discount           | Stable workloads                   |
+| Savings Plans         | Commit $/hour, flexible services               | Long-term but flexible usage       |
+| Spot Instances        | Unused capacity, up to ~90% cheaper, interrupt | Batch, stateless, fault-tolerant   |
+| Dedicated Host        | Physical server for you                        | Compliance / licensing             |
+| Dedicated Instances   | Isolated hardware                              | Isolation needed                   |
+| Capacity Reservations | Reserve capacity in an AZ                      | Guaranteed capacity in specific AZ |
 
 ---
 
-## 🔐 12. Key Pairs, SSH & Recovery
+## 🔐 Key Pair & Lost Key Recovery
 
-* **Key Pair:** Public key + Private key
-* Private key: stays with you (`.pem`)
-* Public key: stored on EC2 under:
+Key Pair = **public + private key**
 
-```text
+* Public key stored in instance
+* Private key with you
+
+Authorized keys location (Amazon Linux):
+
+```bash
 /home/ec2-user/.ssh/authorized_keys
 ```
 
-### 🧪 Lab 12 — Lost Private Key Recovery (Dummy EC2 Trick)
+### 🧪 LAB 12 – Recover EC2 Using Dummy Server (Lost Key)
 
-**Goal:** Recover SSH access when `.pem` file is lost.
-
-1️⃣ Stop **Main Instance** (lost key one).
-2️⃣ Detach its root EBS volume.
-3️⃣ Attach that volume to a **Dummy Instance**.
-4️⃣ On dummy EC2:
+1. Stop the main instance
+2. Detach its root EBS volume
+3. Attach that volume to a **dummy EC2** (with working key)
+4. On dummy instance:
 
 ```bash
-sudo mkdir /mnt/main
-sudo mount -t xfs -o nouuid /dev/xvdb1 /mnt/main
-cd /mnt/main/home/ec2-user/.ssh
+lsblk
+
+sudo mount -t xfs -o nouuid /dev/xvdb1 /mnt/mount
+
+cd /mnt/mount/home/ec2-user/.ssh
 ```
 
-5️⃣ Replace `authorized_keys` with a new one (from dummy’s key pair).
-6️⃣ Unmount & detach the volume:
+5. Replace `authorized_keys` with dummy instance’s key:
 
 ```bash
-cd /
-sudo umount /mnt/main
+sudo cp /home/ec2-user/.ssh/authorized_keys /mnt/mount/home/ec2-user/.ssh/authorized_keys
 ```
 
-7️⃣ Attach volume back to **Main Instance** as root.
-8️⃣ Start main instance and connect using dummy’s `.pem`.
-
-✅ Access restored.
+6. Detach the volume → Attach back to original instance as root
+7. Start main instance → Now you can SSH with dummy key 🎯
 
 ---
 
-### 🔑 Generate New SSH Key Pair (Local)
+## 🐚 Shell Script Automation on EC2
 
-```bash
-ssh-keygen -t rsa
-```
-
-* Private: `id_rsa`
-* Public: `id_rsa.pub`
-
-You can copy the **public key** into `authorized_keys` on EC2 to allow login.
-
----
-
-## 🐚 13. Shell Scripting + User Data
-
-### 🧪 Lab 13 — Simple Apache Install Script
-
-Create script:
+### 🧪 LAB 13 – Script to Install Apache & Website
 
 ```bash
 vi web.sh
 ```
+
+Add:
 
 ```bash
 #!/bin/bash
@@ -507,20 +456,24 @@ systemctl enable httpd
 echo "<h1>Hi From Website</h1>" > /var/www/html/index.html
 ```
 
-Make executable & run:
+Then:
 
 ```bash
 chmod 700 web.sh
 ./web.sh
 ```
 
+Apache installs & serves page automatically ✅
+
 ---
 
-### ⚡ User Data (Run Script at First Boot)
+## ⚡ EC2 User Data (Bootstrapping)
 
-**User Data** = Script that runs automatically when instance is first launched.
+**User Data** = Script that runs only on **first boot**.
 
-Example (Apache auto setup):
+### 🧪 LAB 14 – Use User Data for Apache
+
+During instance launch → **Advanced Details → User data**:
 
 ```bash
 #!/bin/bash
@@ -531,15 +484,11 @@ systemctl enable httpd
 echo "<h1>Hi From Website</h1>" > /var/www/html/index.html
 ```
 
-Add this script in:
+Instance comes up with Apache running & page ready 🎉
 
-> Launch EC2 → Advanced details → User data
+### Refreshing User Data
 
----
-
-### 🔁 Re-run Updated User Data (Cloud-Init Reset)
-
-On the instance:
+To force re-run:
 
 ```bash
 sudo rm -rf /var/lib/cloud/*
@@ -550,43 +499,47 @@ sudo cloud-init modules --mode=final
 
 ---
 
-## 🌐 14. ENI (Elastic Network Interface) & Virtual Hosting
+## 🌐 ENI – Elastic Network Interface
 
-### 🧠 ENI Basics
+ENI = virtual network card for EC2.
 
-ENI = Virtual network card attached to an EC2 instance.
+Contains:
 
-Includes:
-
-* Private IP(s)
-* Optional public / Elastic IP
+* Private IP (mandatory)
+* Optional Public / Elastic IP
 * Security groups
 * MAC address
 
-### 🧪 Lab 14 — Attach Extra ENI + Elastic IP
+### 🧪 LAB 15 – Attach Additional ENI
 
-1️⃣ EC2 → **Network Interfaces** → Create ENI
-2️⃣ Choose subnet & security group
-3️⃣ Attach ENI to an instance
-4️⃣ Allocate **Elastic IP** → Associate to ENI
+1. EC2 → **Network Interfaces → Create**
+2. Choose VPC, subnet, security group
+3. **Actions → Attach** to EC2
+4. Optionally allocate & attach an **Elastic IP** to the ENI
 
-Result: Instance now has multiple private IPs & Elastic IP.
+Now instance can have multiple IPs.
 
 ---
 
-### 🌍 Name-Based Virtual Hosting (Apache)
+## 🌍 Virtual Hosting (Two Websites on One EC2)
 
-Goal: Host 2 websites on one EC2.
+### 🧪 LAB 16 – Name/IP Based Virtual Hosting (Apache)
 
-1️⃣ Inside `/var/www/html`:
+1. Create directories:
 
 ```bash
+cd /var/www/html
 sudo mkdir web1 web2
-echo "<h1>Site 1</h1>" | sudo tee /var/www/html/web1/index.html
-echo "<h1>Site 2</h1>" | sudo tee /var/www/html/web2/index.html
 ```
 
-2️⃣ Edit Apache config:
+2. Add `index.html` inside each:
+
+```bash
+sudo vi /var/www/html/web1/index.html
+sudo vi /var/www/html/web2/index.html
+```
+
+3. Edit Apache config:
 
 ```bash
 sudo vi /etc/httpd/conf/httpd.conf
@@ -595,303 +548,247 @@ sudo vi /etc/httpd/conf/httpd.conf
 Add:
 
 ```apache
-<VirtualHost *:80>
-    ServerName site1.example.com
+<VirtualHost Private-IP1:80>
     DocumentRoot "/var/www/html/web1"
 </VirtualHost>
 
-<VirtualHost *:80>
-    ServerName site2.example.com
+<VirtualHost Private-IP2:80>
     DocumentRoot "/var/www/html/web2"
 </VirtualHost>
 ```
 
-3️⃣ Restart Apache:
+4. Restart Apache:
 
 ```bash
 sudo systemctl restart httpd
 ```
 
-With proper DNS, both domains go to same EC2 but different content.
+Now each IP shows a different site.
 
 ---
 
-## 🖥️ 15. PuTTY for Windows Users
-
-**PuTTY** is an SSH client for Windows.
+## 💻 PuTTY (Windows SSH Client)
 
 Steps:
 
-1️⃣ Convert `.pem` → `.ppk` using **PuTTYgen**.
-2️⃣ Open PuTTY:
+1. Convert `.pem` to `.ppk` using **PuTTYgen**
+2. Open **PuTTY**
 
-* Hostname: `ec2-user@<PUBLIC-IP>`
-* SSH → Auth → Select `.ppk` file
-  3️⃣ Connect.
-
----
-
-## 🔒 16. Session Manager (SSM) — No SSH Needed
-
-**AWS Systems Manager Session Manager** lets you connect to EC2 **without SSH**, **without key pairs**, and **without open port 22**.
-
-### 🧪 Lab 15 — Connect via Session Manager
-
-1️⃣ Ensure EC2 has **SSM Agent** (most AMIs already do).
-2️⃣ Create IAM Role with:
-
-* `AmazonSSMManagedInstanceCore`
-
-3️⃣ Attach IAM Role to EC2.
-4️⃣ In EC2 console → **Connect → Session Manager → Start session**.
-
-✅ You get a shell in browser — secure & keyless.
+   * Host: EC2 Public IP
+   * SSH → Auth → Browse .ppk
+3. Connect → Accept → Logged in ✅
 
 ---
 
-## 🖥️ 17. EC2 Serial Console
+## 🔒 Session Manager (No SSH Needed)
 
-* Direct **low-level console** access (OS boot, kernel issues)
-* Works even if SSH is broken (firewall, misconfigured network)
-* For **Nitro** instances only
+**AWS Systems Manager – Session Manager** lets you connect **without**:
 
-### Steps
+* SSH port 22
+* Key pairs
+* Public IP
 
-1️⃣ Enable in EC2 settings: **EC2 Serial Console**.
-2️⃣ Stop & start instance (if needed).
-3️⃣ EC2 → Select instance → Connect → **EC2 Serial Console**.
+### 🧪 LAB 17 – Use Session Manager
 
----
+1. Ensure instance has **SSM Agent** (Amazon Linux/Ubuntu usually have it)
+2. Create IAM Role with policy:
 
-## ⚙️ 18. Burstable vs Fixed Performance Instances
+   * `AmazonSSMManagedInstanceCore`
+3. Attach role to instance
+4. EC2 → **Connect → Session Manager → Start Session**
 
-### 🌡️ Burstable Instances
-
-* Example: `t2`, `t3`, `t4g`
-* Have **CPU credits**
-* When idle → earn credits
-* When busy → use credits to “burst” to higher CPU
-
-Great for:
-
-* Low/medium workloads with occasional spikes
-
-### 🧱 Fixed Performance
-
-* Example: `m5`, `c5`, `r5`
-* No credit system
-* Steady, consistent CPU
-
-Great for:
-
-* Constant, predictable workloads
+You get terminal access from the browser 🔐
 
 ---
 
-## ⚖️ 19. Load Balancer (ELB) + Lab
+## 🖥️ EC2 Serial Console
 
-**Elastic Load Balancing (ELB)** distributes traffic across multiple EC2 instances.
+* Serial-level access like a physical server
+* Good for boot issues, network misconfig
 
-### Types
+Steps (once per account/region):
 
-* **ALB (Application LB)** → Layer 7 (HTTP/HTTPS), microservices, path-based routing
-* **NLB (Network LB)** → Layer 4 (TCP/UDP), ultra-low latency
-* **Gateway LB** → For firewalls & 3rd-party appliances
-* **Classic LB** → Old, legacy
-
----
-
-### 🧪 Lab 16 — ALB with 2 EC2 Web Servers
-
-1️⃣ **Launch 2 EC2 instances**
-
-* Install Apache and host different content:
-
-  * EC2-1: `"<h1>Server 1</h1>"`
-  * EC2-2: `"<h1>Server 2</h1>"`
-
-2️⃣ **Create Target Group**
-
-* EC2 → **Target Groups**
-* Target type: **Instances**
-* Add both EC2 instances
-* Health check: `/`
-
-3️⃣ **Create Application Load Balancer**
-
-* EC2 → **Load Balancers → Create**
-* Type: **Application Load Balancer**
-* Scheme: **Internet-facing**
-* Listeners: HTTP 80
-* Attach Security Group allowing HTTP
-* Default action: Forward to **Target Group**
-
-4️⃣ **Test**
-
-* Copy ALB DNS name → open in browser
-* Refresh multiple times → traffic alternates between EC2-1 & EC2-2.
+1. EC2 → **Settings → EC2 Serial Console → Enable**
+2. Use supported Nitro-based instances
+3. EC2 → Select instance → **Connect → EC2 Serial Console**
 
 ---
 
-## 📈 20. Auto Scaling + CloudWatch
+## ⚙️ Burstable vs Fixed Performance Instances
 
-**Auto Scaling Group (ASG)** automatically adds/removes EC2 instances based on demand.
+### 🔹 Burstable
+
+* Families: `t2`, `t3`, `t3a`, `t4g`
+* Use **CPU credits**
+* Cheap, good for variable workloads
+
+### 🔹 Fixed Performance
+
+* Families: `m5`, `m6i`, `c5`, `r5`, etc.
+* Constant, predictable performance
+
+---
+
+## ⚖️ Load Balancers (ELB)
+
+A **Load Balancer** distributes traffic across multiple instances.
+
+Types:
+
+1. **ALB** – Application (Layer 7)
+2. **NLB** – Network (Layer 4)
+3. **Gateway LB** – For firewalls/inspection
+4. **Classic LB** – Old, legacy
+
+### 🔁 Basic Flow
+
+```text
+User → Load Balancer → Target Group → EC2 instances
+```
+
+---
+
+## 🧪 LAB 18 – Create Application Load Balancer (ALB)
+
+1. Launch **2 EC2 instances** with Apache pages:
+
+   * Instance 1: "Server 1"
+   * Instance 2: "Server 2"
+2. EC2 → **Target Groups → Create**
+
+   * Type: Instances
+   * Register both EC2s
+3. EC2 → **Load Balancers → Create**
+
+   * Type: Application Load Balancer
+   * Internet-facing
+   * Listener: HTTP 80
+   * Select subnets & SG (allow HTTP)
+   * Attach Target Group
+4. Copy ALB **DNS name** → open in browser
+
+   * Refresh multiple times → see traffic switching between servers
+
+---
+
+## ⚙️ Auto Scaling Group (ASG)
+
+Auto Scaling automatically adjusts number of EC2 instances.
 
 Key settings:
 
-* **Min** capacity
-* **Max** capacity
-* **Desired** capacity
+* **Min** → Minimum instances
+* **Max** → Max instances
+* **Desired** → Normal target count
 
-### 🧱 Launch Template (LT)
+Requires **Launch Template (LT)**:
 
-Reusable config containing:
+Includes:
 
 * AMI
 * Instance type
-* Security group
 * Key pair
+* Security group
 * User data
-* EBS mappings
+* Storage & IAM role
 
 ---
 
-### 🧪 Lab 17 — Create ASG + Target Tracking Policy
+## 🧪 LAB 19 – Create Auto Scaling Group
 
-1️⃣ **Create Launch Template**
+1. EC2 → **Launch Templates → Create Template**
+2. EC2 → **Auto Scaling Groups → Create**
 
-* EC2 → **Launch Templates → Create**
-* Configure AMI, instance type, SG, key, user data if needed.
-
-2️⃣ **Create Auto Scaling Group**
-
-* Use the Launch Template
-* Select subnets in at least 2 AZs
-* Set:
-
-  * Min: `1`
-  * Desired: `1`
-  * Max: `3`
-
-3️⃣ **Attach to ALB**
-
-* In ASG wizard → attach to existing Target Group of ALB.
-
-4️⃣ **Add Scaling Policy (Target Tracking)**
-
-* Example: Keep average **CPU at 50%**
-* ASG adds more instances when CPU > 50%
-
-5️⃣ **Generate Load (inside EC2)**
-
-```bash
-sudo yum install stress -y
-stress --cpu 60 --timeout 300
-```
-
-* Monitor: CloudWatch → Metrics → ASG/EC2
-* ASG should launch new instances when CPU stays high.
+   * Choose launch template
+   * Choose subnets
+   * Configure Min/Max/Desired (e.g., 1/3/1)
+3. Finish creation
+4. Stop 1 instance → ASG will launch a new one automatically 🔁
 
 ---
 
-## 📊 21. CloudWatch Metrics & Alarms
+## 🧪 LAB 20 – Integrate ASG with ALB
 
-**Amazon CloudWatch**:
+1. Create an ALB + Target Group (from earlier lab)
+2. In ASG:
 
-* Collects **metrics** (CPU, Network, Disk, etc.)
-* Creates **alarms**
-* Can trigger **actions** (SNS, ASG, Lambda)
+   * Attach the same Target Group
+3. Ensure SGs allow traffic from ALB to instances
+4. Now:
 
-### Alarm States:
-
-* `OK` → normal
-* `ALARM` → threshold breached
-* `INSUFFICIENT_DATA` → not enough data
+   * Users hit ALB DNS
+   * ALB routes → ASG instances
+   * ASG scales instances, ALB distributes
 
 ---
 
-### 🧪 Lab 18 — Create CPU Alarm for EC2
+## 📊 CloudWatch & Auto Scaling Policies
 
-1️⃣ Enable **detailed monitoring** (optional) when launching EC2.
-2️⃣ Go to **CloudWatch → Metrics → EC2 → Per-Instance Metrics**.
-3️⃣ Select metric: `CPUUtilization`.
-4️⃣ Click “Create alarm”.
-5️⃣ Condition:
+**CloudWatch** monitors:
 
-* Example: **CPU > 70% for 5 minutes**
+* CPU, memory (via agent), disk, network, etc.
 
-6️⃣ Action: (optional) send notification using SNS.
-7️⃣ Generate load:
+**Alarms** → Trigger when metric crosses thresholds.
+
+Alarm states:
+
+* `OK`
+* `ALARM`
+* `INSUFFICIENT_DATA`
+
+---
+
+## 🧪 LAB 21 – CloudWatch Alarm for EC2 CPU
+
+1. Launch instance (enable **Detailed Monitoring** if needed)
+2. CloudWatch → **Metrics → EC2 → Per-Instance Metrics**
+3. Select `CPUUtilization` for instance
+4. Create alarm:
+
+   * Condition: `CPUUtilization > 80% for 5 minutes`
+5. Use `stress` to increase load:
 
 ```bash
 sudo yum install stress -y
 stress --cpu 20 --timeout 300
 ```
 
-8️⃣ Watch alarm change state to **ALARM** in CloudWatch.
+CPU goes high → Alarm becomes `ALARM`.
 
 ---
 
-## 💼 22. EC2 Interview Questions (DevOps Focus)
+## 🧪 LAB 22 – Target Tracking Policy for ASG
 
-**Concepts**
+1. Open your **Auto Scaling Group**
+2. Go to **Automatic Scaling → Add Policy**
+3. Choose **Target Tracking**
 
-1. What is Amazon EC2?
-2. Difference between EC2 & Lambda?
-3. What is an AMI? Types?
-4. What is user data and when does it run?
-5. What is the difference between EBS and Instance Store?
+   * Metric: Average CPUUtilization
+   * Target: e.g., 50%
+4. When CPU > 50% → ASG adds instances
+   When CPU < 50% → ASG terminates extra ones
 
-**Storage & Backup**
-
-6. What is an EBS snapshot?
-7. Explain EBS volume types.
-8. How to move data from one instance to another using snapshots?
-
-**Networking & Access**
-
-9. What is an ENI?
-10. Difference between Security Group & NACL? (for EC2 view)
-11. How to connect EC2 without SSH (no 22 open)?
-12. What is Session Manager?
-
-**High Availability & Scaling**
-
-13. Difference between vertical & horizontal scaling?
-14. What is an Auto Scaling Group?
-15. How do ALB + ASG work together?
-16. Explain target tracking scaling policy.
-
-**Cost Optimization**
-
-17. On-Demand vs Reserved vs Spot?
-18. When to use Spot instances?
-19. When to use Savings Plans instead of RIs?
-
-**Troubleshooting**
-
-20. What if you lost your private key?
-21. EC2 not reachable over SSH — how do you troubleshoot?
-22. How do you debug boot issues? (Serial Console / User data logs)
+Use `stress` on one instance, watch new instances launched automatically.
 
 ---
 
-## 🏁 23. Final Summary (What You Learned)
+## 🏁 EC2 Summary (Interview Ready)
 
-By now you understand:
+By now, you understand:
 
-✅ What is EC2 & core concepts
-✅ How to install Apache / Nginx on Linux & host websites
-✅ How to run web apps on Ubuntu & Windows (IIS)
-✅ AMIs, snapshots, backups, custom AMIs
-✅ EBS vs Instance Store + EBS volume types
-✅ How to attach & mount EBS volumes + `/etc/fstab`
-✅ EC2 instance families, naming, and purchasing options
-✅ SSH keys, recovery tricks, PuTTY, Session Manager
-✅ User data & shell scripting automation
-✅ ENI, multi-IP, virtual hosting
-✅ Load Balancers (ALB) + Target Groups
-✅ Auto Scaling Groups + CloudWatch + Scaling Policies
-✅ CloudWatch metrics & alarms for EC2
-✅ Interview-style questions to revise quickly
+✅ What is EC2, AMI, EBS, SG, Key Pair
+✅ Apache & NGINX on Amazon Linux & Ubuntu
+✅ Windows EC2 + IIS
+✅ EBS volumes, mounts, snapshots & backup
+✅ Instance store vs EBS
+✅ Instance families & purchasing options
+✅ User Data & shell scripting automation
+✅ Lost key recovery using dummy server
+✅ ENIs & virtual hosting
+✅ PuTTY, Session Manager, Serial Console
+✅ Load Balancers (ALB/NLB) and Target Groups
+✅ Auto Scaling Groups, Launch Templates
+✅ CloudWatch metrics & alarms, scaling policies
+
+�
 
