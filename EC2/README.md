@@ -1,5 +1,3 @@
-Here’s **one single EC2 README file** you can copy–paste directly into `EC2/README.md` in your repo.
-(No “PART 1 / PART 2”, everything is in this one file.)
 
 ---
 
