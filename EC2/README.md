@@ -774,287 +774,290 @@ Use `stress` on one instance, watch new instances launched automatically.
 
 ## 🏁 EC2 Summary (Interview Ready)
 
-## 🧠 Advanced EC2 Interview Questions & Answers
-1️⃣ What is EC2?
 
-EC2 is a scalable virtual server used to deploy and run applications in the AWS Cloud.
+## ✅ **1. What is Amazon EC2?**
 
-2️⃣ What is an AMI?
+EC2 is a virtual server service that allows users to launch, manage, and scale compute resources in AWS.
 
-An AMI (Amazon Machine Image) is a template containing OS + software + configuration used to launch EC2 instances.
+---
 
-3️⃣ What happens when an EC2 instance is stopped?
+## ✅ **2. What is an AMI?**
 
-The instance shuts down
+AMI (Amazon Machine Image) is a template used to launch EC2 instances.
+It includes OS, software, and configuration.
 
-EBS root volume remains
+---
 
-Instance Store data is lost
+## ✅ **3. Difference between Stop vs Terminate an instance**
 
-Private IP remains
+| Action        | What Happens                                                     |
+| ------------- | ---------------------------------------------------------------- |
+| **Stop**      | Instance shuts down, EBS volume saved, billing for EBS continues |
+| **Terminate** | Instance deleted, EBS deleted if "delete-on-termination=true"    |
 
-Public IP changes (unless Elastic IP is attached)
+---
 
-4️⃣ What happens when an EC2 instance is terminated?
+## ✅ **4. What is a Key Pair?**
 
-Instance is deleted permanently
+Used for SSH (Linux) or RDP (Windows) login.
+Contains **public + private key**.
 
-EBS root volume is deleted (if delete-on-termination = true)
+---
 
-Elastic IP gets detached
+## ✅ **5. Public IP vs Elastic IP**
 
-5️⃣ What is a Key Pair?
+| Public IP             | Elastic IP              |
+| --------------------- | ----------------------- |
+| Auto-assigned         | Static, you manage it   |
+| Changes on stop/start | Remains same            |
+| Free                  | Charged if not attached |
 
-Public & private key used for secure SSH (Linux) or RDP (Windows) login.
+---
 
-6️⃣ Difference between Public IP & Elastic IP?
-Public IP	Elastic IP
-Auto-assigned	Manually assigned
-Changes on stop/start	Permanent
-Free	Charged if unused
-7️⃣ What is Instance Store?
+## ✅ **6. What is Instance Store?**
 
-High-speed local storage attached physically to the host.
-⚠️ Data is lost on stop/terminate.
+Temporary high-speed disk attached physically to host.
+⚠️ *Data is lost when instance stops or terminates.*
 
-8️⃣ What is EBS?
+---
 
-Elastic Block Store = network-attached persistent storage for EC2.
+## ✅ **7. What is EBS?**
 
-9️⃣ What is User Data?
+EBS = network-attached persistent storage.
+Survives stop/start.
 
-A script that runs once at boot for automation (install Apache, updates, etc.).
+---
 
-🔟 What is an ENI?
+## ✅ **8. What is User Data?**
 
-Elastic Network Interface — virtual network card with:
+A script that runs at **first boot** for automation (install apache, updates etc.)
 
-Private IP
+---
 
-Public/Elastic IP
+## ✅ **9. What is ENI?**
 
-SGs
+Elastic Network Interface:
+Private IPs, MAC address, security groups attached to EC2.
 
-MAC address
+---
 
-1️⃣1️⃣ Difference between Security Group vs NACL?
-Security Group	NACL
-Stateful	Stateless
-Instance level	Subnet level
-Allows rules only	Allow + Deny
-1️⃣2️⃣ What is EBS Snapshot?
+## ✅ **10. What is a Security Group?**
 
-Point-in-time backup of a volume. Stored in S3, incremental, can restore any time.
+A **stateful** firewall that allows/denies traffic *to the instance*.
 
-1️⃣3️⃣ What is the difference between gp2 and gp3?
+---
 
-gp3 provides baseline 3000 IOPS and is cheaper
+## 🧠 **Advanced EC2 Questions**
 
-gp2 performance depends on volume size
+## ⭐ **11. What happens to root volume on termination?**
 
-1️⃣4️⃣ What is EC2 Placement Group?
+If "DeleteOnTermination=true", root EBS is deleted automatically.
 
-Used for placement of instances:
+---
 
-Cluster: low latency, high throughput
+## ⭐ **12. What is Placement Group? Types?**
 
-Spread: instances on different hardware
+1. **Cluster** → Low latency, high network throughput
+2. **Spread** → Instances placed across racks for HA
+3. **Partition** → Used for Hadoop, Kafka, big distributed apps
 
-Partition: large distributed apps like HDFS
+---
 
-1️⃣5️⃣ What is EC2 Hibernate?
+## ⭐ **13. What are EBS volume types?**
 
-Saves RAM state to the root disk and resumes from there.
+* gp3 / gp2 → General Purpose
+* io1 / io2 → High IOPS
+* st1 → Throughput optimized
+* sc1 → Cold HDD
 
-1️⃣6️⃣ What is EC2 instance metadata?
+---
 
-URL:
+## ⭐ **14. What is a Launch Template?**
 
-http://169.254.169.254/latest/meta-data/
+A saved configuration for EC2 containing AMI, instance type, SG, user data.
+Used by ASG & Spot Fleets.
 
+---
 
-Used to fetch IAM credentials, instance ID, IP, etc.
+## ⭐ **15. How do you recover EC2 when Key Pair is lost?**
 
-1️⃣7️⃣ What is EC2 Nitro?
+Detach root volume → Attach to temporary instance → Replace **authorized_keys** → Attach back.
 
-Newer hypervisor with better performance, security, faster networking & storage.
+---
 
-1️⃣8️⃣ What is Spot Instance Interruption Notice?
+## ⭐ **16. What is the difference between On-Demand, Spot, and Reserved?**
 
-A 2-minute warning before AWS interrupts a Spot instance.
+* **On-Demand** – pay per hour, flexible
+* **Reserved** – 1/3 year contract, cheaper
+* **Spot** – 90% cheaper, can be interrupted anytime
 
-1️⃣9️⃣ How to recover EC2 if key lost?
+---
 
-Detach root volume → Attach to another instance → Replace authorized_keys → Reattach.
+## ⭐ **17. What is EC2 Hibernate?**
 
-2️⃣0️⃣ What is SSM Session Manager?
+Preserves RAM to disk → instance resumes from same state.
 
-Allows connecting to EC2 without SSH, without public IP, without key pair.
+---
 
-2️⃣1️⃣ How do you monitor EC2 performance?
+## ⭐ **18. What is Dedicated Host?**
 
-Using CloudWatch metrics:
+A physical server dedicated to one customer. Used for compliance.
 
-CPUUtilization
+---
 
-DiskReadOps
+## ⭐ **19. What is Spot Fleet?**
 
-NetworkIn/Out
+A group of spot instances managed automatically.
 
-StatusCheckFailed
+---
 
-2️⃣2️⃣ What is a Launch Template?
+## ⭐ **20. How do you monitor EC2?**
 
-A reusable blueprint for ASG/EC2 with:
+Using CloudWatch for CPU, disk, memory (with agent).
 
-AMI
+---
 
-Instance type
+---
 
-SG
+# ⚖️ Load Balancer (ELB) Interview Questions
 
-User Data
+## ✅ **1. What is a Load Balancer?**
 
-IAM role
+Distributes traffic across multiple EC2 instances.
 
-2️⃣3️⃣ What is a Dedicated Host?
+---
 
-A physical server fully reserved for your use (for licensing or compliance).
+## ✅ **2. Types of AWS Load Balancers**
 
-2️⃣4️⃣ What is the difference between Reboot and Stop?
+1. **ALB — Application Load Balancer** (Layer 7)
+2. **NLB — Network Load Balancer** (Layer 4)
+3. **CLB — Classic Load Balancer** (Old)
+4. **Gateway Load Balancer** (Layer 3 firewall/inspection)
 
-Reboot → Instance restarts, IPs remain
+---
 
-Stop → OS shutdown, public IP changes (unless Elastic IP)
+## ✅ **3. What is a Target Group?**
 
-2️⃣5️⃣ How to improve EC2 network performance?
+A collection of EC2 / IPs / Lambdas behind an LB.
 
-Use enhanced networking (ENA)
+---
 
-Use placement groups
+## ✅ **4. What are Health Checks?**
 
-Use larger instance types
+LB periodically checks instance health.
+Unhealthy instances do NOT receive traffic.
 
-2️⃣6️⃣ What are EC2 Status Checks?
+---
 
-System Status Check → AWS hardware/network
+## ✅ **5. ALB vs NLB**
 
-Instance Status Check → OS-level issues
+| ALB                    | NLB                         |
+| ---------------------- | --------------------------- |
+| Layer 7                | Layer 4                     |
+| URL-based routing      | Millions of requests/second |
+| Supports WebSockets    | Very high performance       |
+| Good for microservices | Good for real-time traffic  |
 
-2️⃣7️⃣ Can you attach multiple ENIs?
+---
 
-Yes, but depends on instance type. Used for:
+## ✅ **6. What is Sticky Session?**
 
-High availability
+LB sends user repeatedly to the same instance.
 
-Multi-subnet applications
+---
 
-Firewalls
+## ✅ **7. Can ALB route by path or hostname?**
 
-2️⃣8️⃣ Can EBS be attached across AZs?
+Yes.
+Examples:
 
-❌ No — EBS is AZ specific
-✔ Snapshot → New volume in another AZ
+* /api → API servers
+* /images → image servers
 
-2️⃣9️⃣ What is the difference between AMI copy and Snapshot copy?
+---
 
-Snapshot → EBS backup
+## ✅ **8. What is Cross-Zone Load Balancing?**
 
-AMI → Full instance template (root volume + launch config)
+LB distributes traffic evenly across all AZs.
 
-3️⃣0️⃣ How to reduce EC2 cost?
+---
 
-Spot instances
+---
 
-Reserved instances / Savings plans
+# 🚀 Auto Scaling Group (ASG) Interview Questions
 
-Right-size instance types
+## ✅ **1. What is Auto Scaling?**
 
-Use auto scaling
+Automatically increases or decreases EC2 instances based on load.
 
-Stop unused instances
+---
 
-🚀 Load Balancer (ALB/NLB) Interview Questions
-1️⃣ What is a Load Balancer in AWS?
+## ✅ **2. What is Launch Template?**
 
-Distributes traffic across multiple EC2 instances for high availability.
+Configuration used by ASG to launch EC2.
 
-2️⃣ Types of Load Balancers?
+---
 
-ALB → Layer 7
+## ✅ **3. What are ASG Capacity Settings?**
 
-NLB → Layer 4
+* **Min** – minimum instances always running
+* **Desired** – normal state
+* **Max** – maximum allowed
 
-Gateway LB → Layer 3
+---
 
-Classic LB → Legacy
+## ✅ **4. Types of Scaling Policies**
 
-3️⃣ What is a Target Group?
+1. **Target Tracking** → Keep CPU at 50%
+2. **Simple Policy** → Trigger when CPU > 80%
+3. **Step Scaling** → Add 1 instance at 60%, 2 instances at 80%
+4. **Scheduled Scaling** → Scale at specific time
 
-Group of EC2/containers that LB routes to.
+---
 
-4️⃣ What are ALB Listeners?
+## ✅ **5. What happens if an instance fails?**
 
-Rules that check incoming traffic (HTTP/HTTPS) and route to target groups.
+ASG automatically replaces it.
 
-5️⃣ What are Health Checks?
+---
 
-LB checks instance health; only sends traffic to healthy instances.
+## ✅ **6. How ASG works with ALB?**
 
-6️⃣ Does ALB support path-based routing?
+* ALB sends traffic
+* ASG keeps required instances alive
+* ALB health checks failing → ASG replaces instance
 
-Yes —
-Example:
+---
 
-/api → API servers  
-/app → Web servers
+## ✅ **7. Does ASG work in multiple AZs?**
 
-7️⃣ Does NLB support static IP?
+Yes. Best practice is **multi-AZ ASG** for HA.
 
-Yes — NLB supports fixed static IPs per AZ.
+---
 
-🚀 Auto Scaling Interview Questions
-1️⃣ What is Auto Scaling Group (ASG)?
+## ✅ **8. What is Warm Pool?**
 
-Automatically adds/removes EC2 instances according to demand.
+A pool of pre-initialized instances ready to start quickly.
 
-2️⃣ What does Min/Max/Desired mean?
+---
 
-Min → lowest allowed
+## ✅ **9. Does Auto Scaling reduce cost?**
 
-Max → highest allowed
+Yes. Removes unused instances when demand is low.
 
-Desired → normal capacity
+---
 
-3️⃣ Types of scaling policies?
+## 🎯 **10. What is Lifecycle Hook?**
 
-Target Tracking (most common)
+Allows custom actions (like install software) before instance enters service.
 
-Step Scaling
+---
 
-Simple Scaling
+---
 
-Scheduled Scaling
 
-4️⃣ How does ASG work with ALB?
 
-ASG registers new EC2 instances automatically into the target group.
-
-5️⃣ What triggers ASG scaling?
-
-CloudWatch alarms, e.g.:
-
-CPU > 70%
-
-Network > 1Gbps
-
-Request count per target
-
-6️⃣ Does ASG replace unhealthy EC2?
-
-Yes — if health check fails, ASG terminates and re-creates instance.
-
-By now, you understand:
+## By now, you understand:
 
 ✅ What is EC2, AMI, EBS, SG, Key Pair
 ✅ Apache & NGINX on Amazon Linux & Ubuntu
