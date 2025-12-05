@@ -1059,19 +1059,19 @@ Allows custom actions (like install software) before instance enters service.
 
 ## By now, you understand:
 
-✅ What is EC2, AMI, EBS, SG, Key Pair
-✅ Apache & NGINX on Amazon Linux & Ubuntu
-✅ Windows EC2 + IIS
-✅ EBS volumes, mounts, snapshots & backup
-✅ Instance store vs EBS
-✅ Instance families & purchasing options
-✅ User Data & shell scripting automation
-✅ Lost key recovery using dummy server
-✅ ENIs & virtual hosting
-✅ PuTTY, Session Manager, Serial Console
-✅ Load Balancers (ALB/NLB) and Target Groups
-✅ Auto Scaling Groups, Launch Templates
-✅ CloudWatch metrics & alarms, scaling policies
+## ✅ What is EC2, AMI, EBS, SG, Key Pair
+   ✅ Apache & NGINX on Amazon Linux & Ubuntu
+   ✅ Windows EC2 + IIS
+   ✅ EBS volumes, mounts, snapshots & backup
+   ✅ Instance store vs EBS
+   ✅ Instance families & purchasing options
+   ✅ User Data & shell scripting automation
+   ✅ Lost key recovery using dummy server
+   ✅ ENIs & virtual hosting
+   ✅ PuTTY, Session Manager, Serial Console
+   ✅ Load Balancers (ALB/NLB) and Target Groups
+   ✅ Auto Scaling Groups, Launch Templates
+   ✅ CloudWatch metrics & alarms, scaling policies
 
-�
+
 
