@@ -1,285 +1,264 @@
-☁️ Amazon CloudWatch – Zero to Hero
-🔍 What is Amazon CloudWatch?
+# ☁️ Amazon CloudWatch – Zero to Hero
 
 Amazon CloudWatch is a monitoring and observability service that provides visibility into AWS resources, applications, and services.
 
-It helps you:
+---
 
-Monitor performance
+## 🔍 What is Amazon CloudWatch?
 
-Detect issues
+Amazon CloudWatch helps you:
 
-Trigger automated actions
+* Monitor performance
+* Detect issues
+* Trigger automated actions
+* Visualize metrics and logs
 
-Visualize metrics and logs
+---
 
-⚙️ Core Features
+## ⭐ Core Features
 
-Metrics – Monitor CPU, memory, disk, and network usage
+* **Metrics** – Monitor CPU, memory, disk, and network usage
+* **Logs** – Collect and analyze system & application logs
+* **Alarms** – Trigger actions when thresholds are crossed
+* **Dashboards** – Visualize metrics in real time
+* **Events** – React to AWS service state changes
 
-Logs – Collect and analyze system and application logs
+---
 
-Alarms – Trigger actions based on thresholds
+## 📊 CloudWatch Metrics
 
-Dashboards – Visualize metrics in real time
+Metrics are time-series data points.
 
-Events / Rules – Automate actions based on changes
+### Common EC2 Metrics
 
-🧠 How CloudWatch Works
+* CPUUtilization
+* NetworkIn / NetworkOut
+* DiskReadOps / DiskWriteOps
+* StatusCheckFailed
 
-AWS services send metrics to CloudWatch
+---
 
-CloudWatch stores and analyzes data
+## 📁 CloudWatch Logs
 
-Alarms monitor thresholds
+Used to collect logs from:
 
-Actions are triggered automatically
+* EC2
+* Lambda
+* ECS
+* Custom applications
 
-Example:
+### Components
 
-CPU > 80%
+* **Log Group** → Collection of logs
+* **Log Stream** → Sequence of log events
 
-Alarm triggers
+---
 
-Auto Scaling adds a new EC2
+## 🚨 CloudWatch Alarms
 
-🧪 LAB 1 – Monitor EC2 Using CloudWatch
-Step 1: Launch EC2
+CloudWatch alarms monitor metrics and trigger actions.
 
-Launch Amazon Linux EC2
+### Alarm States
 
-Enable Detailed Monitoring
+| State             | Description       |
+| ----------------- | ----------------- |
+| OK                | Normal            |
+| ALARM             | Threshold crossed |
+| INSUFFICIENT_DATA | Not enough data   |
 
-Step 2: View Metrics
+### Alarm Actions
+
+* Send SNS notifications
+* Trigger Auto Scaling
+* Invoke Lambda
+
+---
+
+# 🧪 LAB 1 – Monitor EC2 Using CloudWatch
+
+### Step 1: Launch EC2
+
+* Launch Amazon Linux
+* Enable **Detailed Monitoring**
+
+### Step 2: View Metrics
 
 Go to:
 
+```
 CloudWatch → Metrics → EC2 → Per-Instance Metrics
-
+```
 
 Select:
 
-CPUUtilization
+* CPUUtilization
 
-Step 3: Generate CPU Load
+### Step 3: Generate Load
+
+```bash
 sudo yum install stress -y
 stress --cpu 20 --timeout 300
+```
 
+✅ CPU usage will increase in CloudWatch.
 
-✅ CPU usage increases in CloudWatch graph.
+---
 
-🚨 CloudWatch Alarms
-What is an Alarm?
+# 🧪 LAB 2 – Create CloudWatch Alarm
 
-A CloudWatch Alarm monitors a metric and performs actions when thresholds are crossed.
+### Steps:
 
-Alarm States
-State	Description
-OK	Everything is normal
-ALARM	Threshold crossed
-INSUFFICIENT_DATA	Not enough data
-🧪 LAB 2 – Create Alarm for EC2
-Steps:
+1. Open **CloudWatch → Alarms**
+2. Click **Create Alarm**
+3. Select **CPUUtilization**
+4. Set threshold to **80%**
+5. Evaluation period → **5 minutes**
+6. Create Alarm
 
-Go to CloudWatch → Alarms
+---
 
-Choose Create Alarm
+# 📊 CloudWatch Dashboards
 
-Select metric → CPUUtilization
+Dashboards allow visual monitoring of metrics.
 
-Set threshold → > 80%
+You can display:
 
-Select action (SNS or Auto Scaling)
+* CPU Utilization
+* Network In / Out
+* Disk I/O
 
-Create alarm
+---
 
-Test:
-stress --cpu 20 --timeout 300
+# 🧪 LAB 3 – Create Dashboard
 
+1. Go to **CloudWatch → Dashboards**
+2. Click **Create Dashboard**
+3. Add widgets
+4. Save dashboard
 
-✅ Alarm triggers when threshold is crossed.
+---
 
-⚙️ Auto Scaling with CloudWatch
+# 🔁 CloudWatch + Auto Scaling
 
-CloudWatch integrates with Auto Scaling to automatically increase or decrease EC2 instances.
+CloudWatch integrates with Auto Scaling Groups.
 
-Example:
+### Example:
 
-CPU > 70% → Add instance
+* CPU > 70% → Scale Out
+* CPU < 30% → Scale In
 
-CPU < 40% → Remove instance
+---
 
-🧪 LAB 3 – Target Tracking Scaling Policy
-Steps:
+# 🧪 LAB 4 – Target Tracking Policy
 
-Create Launch Template
+1. Create Auto Scaling Group
+2. Select **Target Tracking Policy**
+3. Metric: `CPUUtilization`
+4. Target value: `50%`
 
-Create Auto Scaling Group
+---
 
-Choose Target Tracking Policy
+# 📈 Step Scaling Policy
 
-Set target CPU → 50%
+| CPU Usage | Action            |
+| --------- | ----------------- |
+| > 60%     | Add 1 instance    |
+| > 80%     | Add 2 instances   |
+| < 40%     | Remove 1 instance |
 
-✅ ASG automatically scales instances.
+---
 
-🪜 Step Scaling Policy
+# 📊 CloudWatch Logs Insights
 
-Step scaling adds/removes instances gradually.
+Query logs using:
 
-CPU Usage	Action
-> 60%	Add 1 instance
-> 80%	Add 2 instances
-< 40%	Remove 1 instance
-📊 CloudWatch Dashboards
-What is a Dashboard?
+```sql
+fields @timestamp, @message
+| sort @timestamp desc
+| limit 20
+```
 
-A visual representation of metrics in one place.
+---
 
-Common Metrics:
+# 📊 CloudWatch + Grafana
 
-CPUUtilization
+### Steps:
 
-NetworkIn / NetworkOut
+1. Launch EC2 for Grafana
+2. Install Grafana
+3. Add CloudWatch as Data Source
+4. Attach IAM Role:
 
-DiskReadOps / DiskWriteOps
+   * `CloudWatchFullAccess`
+5. Create dashboards
 
-🧪 LAB 4 – Create Dashboard
+---
 
-Go to CloudWatch → Dashboards
+# 🔐 Required IAM Permissions
 
-Click Create dashboard
-
-Add widgets:
-
-CPUUtilization
-
-NetworkIn
-
-NetworkOut
-
-Save dashboard
-
-✅ Real-time visualization enabled.
-
-📈 CloudWatch + Grafana Integration
-
-Grafana provides advanced visualization for CloudWatch metrics.
-
-🧪 LAB 5 – Install Grafana
-sudo yum install grafana -y
-sudo systemctl start grafana-server
-sudo systemctl enable grafana-server
-
-
-Access:
-
-http://<EC2-Public-IP>:3000
-
-
-Login:
-
-Username: admin
-Password: admin
-
-Connect Grafana to CloudWatch
-
-Go to Connections → Data Sources
-
-Select Amazon CloudWatch
-
-Attach IAM role with:
-
+```
 CloudWatchFullAccess
+CloudWatchLogsFullAccess
+```
 
-Create Dashboard
+---
 
-Add metrics:
+# ❓ CloudWatch Interview Questions
 
-CPUUtilization
+### 1️⃣ What is CloudWatch?
 
-NetworkIn / NetworkOut
+Monitoring and observability service for AWS.
 
-Disk I/O
+### 2️⃣ What metrics does EC2 send?
 
-✅ Live visualization enabled.
+CPU, Network, Disk, Status checks.
 
-📊 CloudWatch vs CloudTrail
-Feature	CloudWatch	CloudTrail
-Purpose	Monitoring	Auditing
-Tracks	Metrics & Logs	API calls
-Use Case	Performance	Security & Compliance
-🧠 CloudWatch Interview Questions
-1. What is CloudWatch?
+### 3️⃣ What is a CloudWatch Alarm?
 
-Monitoring service for AWS resources and applications.
+Triggers actions when a metric crosses a threshold.
 
-2. What metrics does CloudWatch track?
+### 4️⃣ What is a Log Group?
 
-CPU, memory, disk, network, custom metrics.
+Collection of log streams.
 
-3. What is a CloudWatch Alarm?
+### 5️⃣ What is a Log Stream?
 
-Triggers action when threshold is breached.
+Sequence of log events.
 
-4. What is detailed monitoring?
+### 6️⃣ What is Detailed Monitoring?
 
 1-minute metric granularity.
 
-5. What is a custom metric?
-
-User-defined metric sent to CloudWatch.
-
-6. Difference between Logs and Metrics?
-
-Logs = text events
-Metrics = numerical values
-
-7. What is anomaly detection?
-
-ML-based automatic anomaly detection.
-
-8. Can CloudWatch trigger Auto Scaling?
+### 7️⃣ Can CloudWatch trigger Auto Scaling?
 
 Yes.
 
-9. What is EventBridge?
+### 8️⃣ Can CloudWatch invoke Lambda?
 
-Event-driven automation service.
+Yes.
 
-10. What is CloudWatch Agent?
+### 9️⃣ What is a Dashboard?
 
-Agent used to collect logs and system metrics.
+Visual representation of metrics.
 
-🧠 Advanced CloudWatch Concepts
-11. What is a Composite Alarm?
+### 🔟 What is CloudWatch Logs Insights?
 
-Combines multiple alarms using AND/OR logic.
+Query engine for analyzing logs.
 
-12. Can CloudWatch monitor on-prem servers?
+---
 
-Yes, using CloudWatch Agent.
+# ✅ Summary
 
-13. What is metric resolution?
-
-Standard: 5 min
-Detailed: 1 min
-
-14. What is Contributor Insights?
-
-Identifies top contributors to a metric.
-
-15. What is CloudWatch Synthetics?
-
-Monitors endpoints using canaries.
-
-✅ Final Summary
-
-You now understand:
-
-✔ CloudWatch Metrics
-✔ Logs & Alarms
-✔ Auto Scaling Integration
+✔ Metrics
+✔ Logs
+✔ Alarms
 ✔ Dashboards
-✔ Grafana Monitoring
-✔ Interview-Level Concepts
+✔ Auto Scaling
+✔ Interview Questions
+
+---
+
+# 🎉 END OF CLOUDWATCH README
+
+
 
