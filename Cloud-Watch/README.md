@@ -1,6 +1,6 @@
-# ☁️ Amazon CloudWatch – Zero to Hero
+# ☁️ Amazon CloudWatch 
 
-Amazon CloudWatch is a monitoring and observability service that provides visibility into AWS resources, applications, and services.
+Amazon CloudWatch is a **monitoring and observability service** that provides visibility into AWS resources, applications, and services.
 
 ---
 
@@ -100,7 +100,7 @@ sudo yum install stress -y
 stress --cpu 20 --timeout 300
 ```
 
-✅ CPU usage will increase in CloudWatch.
+✅ CPU usage increases in CloudWatch.
 
 ---
 
@@ -119,7 +119,7 @@ stress --cpu 20 --timeout 300
 
 # 📊 CloudWatch Dashboards
 
-Dashboards allow visual monitoring of metrics.
+Dashboards provide real-time visualization.
 
 You can display:
 
@@ -133,14 +133,14 @@ You can display:
 
 1. Go to **CloudWatch → Dashboards**
 2. Click **Create Dashboard**
-3. Add widgets
+3. Add widgets (Line, Number, Graph)
 4. Save dashboard
 
 ---
 
 # 🔁 CloudWatch + Auto Scaling
 
-CloudWatch integrates with Auto Scaling Groups.
+CloudWatch integrates with Auto Scaling.
 
 ### Example:
 
@@ -170,7 +170,7 @@ CloudWatch integrates with Auto Scaling Groups.
 
 # 📊 CloudWatch Logs Insights
 
-Query logs using:
+Analyze logs using queries:
 
 ```sql
 fields @timestamp, @message
@@ -180,26 +180,133 @@ fields @timestamp, @message
 
 ---
 
-# 📊 CloudWatch + Grafana
+# 📊 CloudWatch + Grafana (FULL GUIDE)
 
-### Steps:
-
-1. Launch EC2 for Grafana
-2. Install Grafana
-3. Add CloudWatch as Data Source
-4. Attach IAM Role:
-
-   * `CloudWatchFullAccess`
-5. Create dashboards
+Grafana is an open-source visualization tool used with CloudWatch.
 
 ---
 
-# 🔐 Required IAM Permissions
+## 🔧 Why Use Grafana?
+
+* Advanced dashboards
+* Real-time monitoring
+* Multi-data source support
+* Better visualization than default CloudWatch
+
+---
+
+## 🧱 Architecture
+
+```
+EC2 → CloudWatch → Grafana → Dashboard
+```
+
+---
+
+## 🧪 LAB 5 – Install Grafana on EC2
+
+### Step 1: Launch EC2
+
+* Amazon Linux 2
+* Open port **3000** in Security Group
+
+### Step 2: Install Grafana
+
+```bash
+sudo yum install -y grafana
+sudo systemctl start grafana-server
+sudo systemctl enable grafana-server
+```
+
+### Step 3: Access Grafana
+
+```
+http://<EC2-PUBLIC-IP>:3000
+```
+
+Default credentials:
+
+```
+Username: admin
+Password: admin
+```
+
+---
+
+## 🔑 Configure CloudWatch as Data Source
+
+### Step 1:
+
+Go to:
+
+```
+Configuration → Data Sources → Add data source
+```
+
+### Step 2:
+
+Select **Amazon CloudWatch**
+
+### Step 3:
+
+Authentication:
+
+* Use **IAM Role**
+* Attach policy: `CloudWatchFullAccess`
+
+---
+
+## 🔐 Required IAM Permissions
+
+Attach this role to EC2:
 
 ```
 CloudWatchFullAccess
-CloudWatchLogsFullAccess
 ```
+
+---
+
+## 📊 Create Dashboard in Grafana
+
+1. Go to **Dashboards → Create New**
+2. Add Visualization
+3. Select **CloudWatch**
+4. Choose metrics:
+
+   * CPUUtilization
+   * NetworkIn / Out
+   * DiskReadOps
+5. Save dashboard
+
+---
+
+## 📈 Grafana Visualization Types
+
+* Time series
+* Gauge
+* Bar chart
+* Heatmap
+
+---
+
+## 🚨 Grafana Alerts
+
+Grafana can send alerts via:
+
+* Email
+* Slack
+* Webhooks
+
+---
+
+## ⭐ CloudWatch vs Grafana
+
+| Feature | CloudWatch | Grafana |
+|------|-----------|
+| Native AWS | ✅ | ❌ |
+| Custom Visualization | ❌ | ✅ |
+| Advanced Dashboards | ❌ | ✅ |
+| Alerting | Basic | Advanced |
 
 ---
 
@@ -207,21 +314,21 @@ CloudWatchLogsFullAccess
 
 ### 1️⃣ What is CloudWatch?
 
-Monitoring and observability service for AWS.
+Monitoring and observability service for AWS resources.
 
 ### 2️⃣ What metrics does EC2 send?
 
-CPU, Network, Disk, Status checks.
+CPU, network, disk, and status checks.
 
-### 3️⃣ What is a CloudWatch Alarm?
+### 3️⃣ What is CloudWatch Alarm?
 
-Triggers actions when a metric crosses a threshold.
+Triggers action when threshold is crossed.
 
-### 4️⃣ What is a Log Group?
+### 4️⃣ What is Log Group?
 
-Collection of log streams.
+A collection of log streams.
 
-### 5️⃣ What is a Log Stream?
+### 5️⃣ What is Log Stream?
 
 Sequence of log events.
 
@@ -233,32 +340,32 @@ Sequence of log events.
 
 Yes.
 
-### 8️⃣ Can CloudWatch invoke Lambda?
+### 8️⃣ What is CloudWatch Logs Insights?
 
-Yes.
+Query engine for logs.
 
-### 9️⃣ What is a Dashboard?
+### 9️⃣ What is CloudWatch Dashboard?
 
 Visual representation of metrics.
 
-### 🔟 What is CloudWatch Logs Insights?
+### 🔟 Difference between Alarm & Event?
 
-Query engine for analyzing logs.
+Alarm monitors metrics; Event reacts to state changes.
 
 ---
 
-# ✅ Summary
+# ✅ Final Summary
 
 ✔ Metrics
 ✔ Logs
 ✔ Alarms
 ✔ Dashboards
 ✔ Auto Scaling
+✔ Grafana Integration
 ✔ Interview Questions
 
 ---
 
-# 🎉 END OF CLOUDWATCH README
 
 
 
